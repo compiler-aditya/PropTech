@@ -1,0 +1,86 @@
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+
+export function TicketFilters() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  function updateFilter(key: string, value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value && value !== "ALL") {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    router.push(`/tickets?${params.toString()}`);
+  }
+
+  function clearFilters() {
+    router.push("/tickets");
+  }
+
+  const hasFilters =
+    searchParams.has("status") ||
+    searchParams.has("priority") ||
+    searchParams.has("search");
+
+  return (
+    <div className="flex flex-col sm:flex-row gap-2">
+      <Input
+        placeholder="Search tickets..."
+        defaultValue={searchParams.get("search") || ""}
+        onChange={(e) => {
+          const timer = setTimeout(() => updateFilter("search", e.target.value), 300);
+          return () => clearTimeout(timer);
+        }}
+        className="sm:max-w-[200px]"
+      />
+      <Select
+        value={searchParams.get("status") || "ALL"}
+        onValueChange={(v) => updateFilter("status", v)}
+      >
+        <SelectTrigger className="sm:w-[150px]">
+          <SelectValue placeholder="Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ALL">All Status</SelectItem>
+          <SelectItem value="OPEN">Open</SelectItem>
+          <SelectItem value="ASSIGNED">Assigned</SelectItem>
+          <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+          <SelectItem value="COMPLETED">Completed</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select
+        value={searchParams.get("priority") || "ALL"}
+        onValueChange={(v) => updateFilter("priority", v)}
+      >
+        <SelectTrigger className="sm:w-[150px]">
+          <SelectValue placeholder="Priority" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ALL">All Priority</SelectItem>
+          <SelectItem value="LOW">Low</SelectItem>
+          <SelectItem value="MEDIUM">Medium</SelectItem>
+          <SelectItem value="HIGH">High</SelectItem>
+          <SelectItem value="URGENT">Urgent</SelectItem>
+        </SelectContent>
+      </Select>
+      {hasFilters && (
+        <Button variant="ghost" size="icon" onClick={clearFilters}>
+          <X className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
+  );
+}
