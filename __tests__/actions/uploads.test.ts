@@ -200,6 +200,19 @@ describe("uploads actions", () => {
 
       expect(mockRevalidatePath).toHaveBeenCalledWith("/tickets/ticket-1");
     });
+
+    it("rejects upload to COMPLETED ticket", async () => {
+      mockPrisma.maintenanceTicket.findUnique.mockResolvedValue({
+        submitterId: "user-1",
+        assigneeId: null,
+        status: "COMPLETED",
+      } as never);
+
+      const formData = createFormDataWithFiles(1);
+      const result = await uploadFiles("ticket-1", formData);
+
+      expect(result).toEqual({ error: "Cannot upload files to completed tickets" });
+    });
   });
 
   describe("removeFile", () => {
@@ -295,6 +308,20 @@ describe("uploads actions", () => {
       await removeFile("att-1");
 
       expect(mockRevalidatePath).toHaveBeenCalledWith("/tickets/ticket-1");
+    });
+
+    it("rejects file deletion from COMPLETED ticket", async () => {
+      mockPrisma.fileAttachment.findUnique.mockResolvedValue({
+        id: "att-1",
+        storedName: "uuid.jpg",
+        ticketId: "ticket-1",
+        uploadedBy: "user-1",
+        ticket: { submitterId: "user-1", assigneeId: null, status: "COMPLETED" },
+      } as never);
+
+      const result = await removeFile("att-1");
+
+      expect(result).toEqual({ error: "Cannot delete files from completed tickets" });
     });
   });
 });

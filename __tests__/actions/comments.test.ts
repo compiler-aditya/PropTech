@@ -143,4 +143,18 @@ describe("addComment", () => {
       })
     );
   });
+
+  it("rejects comment over 2000 characters", async () => {
+    const result = await addComment("ticket-1", "a".repeat(2001));
+
+    expect(result).toEqual({ error: "Comment must be 2000 characters or fewer" });
+    expect(mockPrisma.ticketComment.create).not.toHaveBeenCalled();
+  });
+
+  it("accepts comment at exactly 2000 characters", async () => {
+    const result = await addComment("ticket-1", "a".repeat(2000));
+
+    expect(result).toEqual({ success: true });
+    expect(mockPrisma.ticketComment.create).toHaveBeenCalled();
+  });
 });

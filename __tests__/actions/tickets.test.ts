@@ -395,6 +395,60 @@ describe("tickets actions", () => {
         })
       );
     });
+
+    it("rejects assigning a COMPLETED ticket", async () => {
+      mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
+        createMockTicket({ id: "t1", status: "COMPLETED" }) as never
+      );
+
+      const result = await assignTicket("t1", "tech-1");
+
+      expect(result).toEqual({ error: "Cannot assign completed tickets" });
+      expect(mockPrisma.maintenanceTicket.update).not.toHaveBeenCalled();
+    });
+
+    it("notifies old assignee on reassignment", async () => {
+      mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
+        createMockTicket({ id: "t1", title: "Fix sink", assigneeId: "old-tech" }) as never
+      );
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: "new-tech",
+        name: "New Tech",
+        role: "TECHNICIAN",
+      } as never);
+
+      await assignTicket("t1", "new-tech");
+
+      expect(mockPrisma.notification.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            userId: "old-tech",
+            type: "TICKET_ASSIGNED",
+          }),
+        })
+      );
+    });
+
+    it("logs previous assignee in activity details", async () => {
+      mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
+        createMockTicket({ id: "t1", title: "Fix sink", assigneeId: "old-tech" }) as never
+      );
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: "new-tech",
+        name: "New Tech",
+        role: "TECHNICIAN",
+      } as never);
+
+      await assignTicket("t1", "new-tech");
+
+      expect(mockPrisma.ticketActivityLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          ticketId: "t1",
+          action: "ASSIGNED",
+          details: expect.stringContaining('"previousAssigneeId":"old-tech"'),
+        }),
+      });
+    });
   });
 
   describe("updateTicketStatus", () => {
@@ -419,9 +473,13 @@ describe("tickets actions", () => {
       mockPrisma.notification.create.mockResolvedValue({} as never);
     });
 
-    it("allows valid transition OPEN -> ASSIGNED", async () => {
+    it("allows valid transition OPEN -> ASSIGNED (with assignee)", async () => {
+      const ticketOpenWithAssignee = {
+        ...createMockTicket({ id: "t1", status: "OPEN", title: "Test", assigneeId: "tech-1" }),
+        submitter: { id: "sub-1" },
+      };
       mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
-        ticketOpen as never
+        ticketOpenWithAssignee as never
       );
 
       const result = await updateTicketStatus("t1", "ASSIGNED");
@@ -521,8 +579,12 @@ describe("tickets actions", () => {
     });
 
     it("notifies submitter when different from updater", async () => {
+      const ticketOpenWithAssignee = {
+        ...createMockTicket({ id: "t1", status: "OPEN", title: "Test", assigneeId: "tech-1" }),
+        submitter: { id: "sub-1" },
+      };
       mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
-        ticketOpen as never
+        ticketOpenWithAssignee as never
       );
 
       await updateTicketStatus("t1", "ASSIGNED");
@@ -541,13 +603,89 @@ describe("tickets actions", () => {
       mockRequireAuth.mockResolvedValue(
         createMockUser({ id: "sub-1", role: "MANAGER" })
       );
+      const ticketOpenWithAssignee = {
+        ...createMockTicket({ id: "t1", status: "OPEN", title: "Test", assigneeId: "tech-1" }),
+        submitter: { id: "sub-1" },
+      };
       mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
-        ticketOpen as never
+        ticketOpenWithAssignee as never
       );
 
       await updateTicketStatus("t1", "ASSIGNED");
 
       expect(mockPrisma.notification.create).not.toHaveBeenCalled();
+    });
+
+    it("rejects invalid status enum value", async () => {
+      mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
+        ticketOpen as never
+      );
+
+      const result = await updateTicketStatus("t1", "INVALID_STATUS");
+
+      expect(result).toEqual({ error: "Invalid status" });
+    });
+
+    it("clears assigneeId when transitioning to OPEN", async () => {
+      mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
+        ticketAssigned as never
+      );
+
+      await updateTicketStatus("t3", "OPEN");
+
+      expect(mockPrisma.maintenanceTicket.update).toHaveBeenCalledWith({
+        where: { id: "t3" },
+        data: expect.objectContaining({
+          status: "OPEN",
+          assigneeId: null,
+        }),
+      });
+    });
+
+    it("clears completedAt when moving away from COMPLETED", async () => {
+      const ticketCompleted = {
+        ...createMockTicket({
+          id: "t4",
+          status: "COMPLETED",
+          completedAt: new Date("2024-06-01"),
+          assigneeId: "tech-1",
+        }),
+        submitter: { id: "sub-1" },
+      };
+      mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
+        ticketCompleted as never
+      );
+
+      await updateTicketStatus("t4", "IN_PROGRESS");
+
+      expect(mockPrisma.maintenanceTicket.update).toHaveBeenCalledWith({
+        where: { id: "t4" },
+        data: expect.objectContaining({
+          status: "IN_PROGRESS",
+          completedAt: null,
+        }),
+      });
+    });
+
+    it("blocks technician from reopening COMPLETED ticket", async () => {
+      mockRequireAuth.mockResolvedValue(
+        createMockUser({ id: "tech-1", role: "TECHNICIAN" })
+      );
+      const ticketCompleted = {
+        ...createMockTicket({
+          id: "t1",
+          status: "COMPLETED",
+          assigneeId: "tech-1",
+        }),
+        submitter: { id: "sub-1" },
+      };
+      mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
+        ticketCompleted as never
+      );
+
+      const result = await updateTicketStatus("t1", "IN_PROGRESS");
+
+      expect(result).toEqual({ error: "Only managers can reopen completed tickets" });
     });
   });
 
@@ -596,6 +734,26 @@ describe("tickets actions", () => {
           details: JSON.stringify({ from: "LOW", to: "HIGH" }),
         }),
       });
+    });
+
+    it("rejects invalid priority enum value", async () => {
+      mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
+        createMockTicket({ id: "t1" }) as never
+      );
+
+      const result = await updateTicketPriority("t1", "SUPER_HIGH");
+
+      expect(result).toEqual({ error: "Invalid priority" });
+    });
+
+    it("rejects priority change on COMPLETED ticket", async () => {
+      mockPrisma.maintenanceTicket.findUnique.mockResolvedValue(
+        createMockTicket({ id: "t1", status: "COMPLETED" }) as never
+      );
+
+      const result = await updateTicketPriority("t1", "HIGH");
+
+      expect(result).toEqual({ error: "Cannot change priority on completed tickets" });
     });
   });
 

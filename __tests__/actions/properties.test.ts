@@ -150,5 +150,17 @@ describe("properties actions", () => {
         })
       );
     });
+
+    it("rejects whitespace-only name", async () => {
+      const formData = createMockFormData({
+        name: "   ",
+        address: "123 Main Street",
+      });
+
+      const result = await createProperty(formData);
+
+      expect(result).toEqual({ error: expect.any(String) });
+      expect(mockPrisma.property.create).not.toHaveBeenCalled();
+    });
   });
 });

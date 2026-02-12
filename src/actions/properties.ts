@@ -5,8 +5,8 @@ import { requireRole } from "@/lib/auth-utils";
 import { z } from "zod";
 
 const propertySchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
+  name: z.string().trim().min(2, "Name must be at least 2 characters"),
+  address: z.string().trim().min(5, "Address must be at least 5 characters"),
 });
 
 export async function getProperties() {

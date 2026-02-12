@@ -25,17 +25,20 @@ export function StatusActions({
   ticketId,
   currentStatus,
   userRole,
+  hasAssignee = false,
 }: {
   ticketId: string;
   currentStatus: string;
   userRole: string;
+  hasAssignee?: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
 
   const allowed = VALID_TRANSITIONS[currentStatus] || [];
 
-  // Filter by role permissions
+  // Filter by role permissions and assignee state
   const filtered = allowed.filter((s) => {
+    if (s === "ASSIGNED" && !hasAssignee) return false;
     if (userRole === "TECHNICIAN") {
       return ["IN_PROGRESS", "COMPLETED", "ASSIGNED"].includes(s);
     }

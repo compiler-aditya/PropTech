@@ -8,7 +8,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { AuthError } from "next-auth";
 
 export async function loginAction(formData: FormData) {
-  const email = formData.get("email") as string;
+  const email = (formData.get("email") as string).toLowerCase().trim();
 
   const rl = rateLimit(`login:${email}`, { maxAttempts: 5, windowMs: 15 * 60 * 1000 });
   if (!rl.success) {
@@ -38,7 +38,7 @@ export async function registerAction(formData: FormData) {
 
   const raw = {
     name: formData.get("name") as string,
-    email: formData.get("email") as string,
+    email: (formData.get("email") as string).toLowerCase().trim(),
     password: formData.get("password") as string,
     role: "TENANT", // Self-registration is always TENANT
   };
