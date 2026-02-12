@@ -13,6 +13,7 @@ import { ActivityLog } from "@/components/tickets/activity-log";
 import { CommentSection } from "@/components/tickets/comment-section";
 import { AssignDialog } from "@/components/tickets/assign-dialog";
 import { StatusActions } from "@/components/tickets/status-actions";
+import { PriorityActions } from "@/components/tickets/priority-actions";
 import { ImageUpload } from "@/components/uploads/image-upload";
 import { CATEGORY_LABELS, ROLES } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
@@ -57,18 +58,27 @@ export default async function TicketDetailPage({
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {/* Manager: assign + status */}
+          {/* Manager: assign + priority + status */}
           {user.role === ROLES.MANAGER && (
             <>
-              <AssignDialog
-                ticketId={ticket.id}
-                technicians={technicians}
-                currentAssigneeId={ticket.assigneeId}
-              />
+              {ticket.status !== "COMPLETED" && (
+                <>
+                  <AssignDialog
+                    ticketId={ticket.id}
+                    technicians={technicians}
+                    currentAssigneeId={ticket.assigneeId}
+                  />
+                  <PriorityActions
+                    ticketId={ticket.id}
+                    currentPriority={ticket.priority}
+                  />
+                </>
+              )}
               <StatusActions
                 ticketId={ticket.id}
                 currentStatus={ticket.status}
                 userRole={user.role}
+                hasAssignee={!!ticket.assigneeId}
               />
             </>
           )}
@@ -78,6 +88,7 @@ export default async function TicketDetailPage({
               ticketId={ticket.id}
               currentStatus={ticket.status}
               userRole={user.role}
+              hasAssignee={!!ticket.assigneeId}
             />
           )}
         </div>

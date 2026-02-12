@@ -28,9 +28,16 @@ const MAGIC_BYTES: Record<string, number[][]> = {
 function validateMagicBytes(buffer: Buffer, mimeType: string): boolean {
   const signatures = MAGIC_BYTES[mimeType];
   if (!signatures) return false;
-  return signatures.some((sig) =>
+  const matchesPrefix = signatures.some((sig) =>
     sig.every((byte, i) => buffer.length > i && buffer[i] === byte)
   );
+  if (!matchesPrefix) return false;
+  // RIFF header is shared by WAV/AVI/WebP — verify "WEBP" at offset 8
+  if (mimeType === "image/webp") {
+    if (buffer.length < 12) return false;
+    return buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50;
+  }
+  return true;
 }
 
 async function ensureUploadDir() {

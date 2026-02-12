@@ -11,6 +11,9 @@ export async function addComment(ticketId: string, content: string) {
   if (!content || content.trim().length < 1) {
     return { error: "Comment cannot be empty" };
   }
+  if (content.length > 2000) {
+    return { error: "Comment must be 2000 characters or fewer" };
+  }
 
   const ticket = await prisma.maintenanceTicket.findUnique({
     where: { id: ticketId },

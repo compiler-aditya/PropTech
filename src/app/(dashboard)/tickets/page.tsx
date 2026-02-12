@@ -48,7 +48,7 @@ export default async function TicketsPage({
       </Suspense>
 
       {tickets.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {tickets.map((ticket) => (
             <TicketCard key={ticket.id} ticket={ticket} />
           ))}

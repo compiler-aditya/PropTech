@@ -3,7 +3,8 @@
 import prisma from "@/lib/prisma";
 import { requireAuth, requireRole } from "@/lib/auth-utils";
 import { createTicketSchema } from "@/lib/validations/ticket";
-import { VALID_TRANSITIONS, ROLES } from "@/lib/constants";
+import { VALID_TRANSITIONS, ROLES, TICKET_STATUS, TICKET_PRIORITY } from "@/lib/constants";
+import type { TicketStatus, TicketPriority } from "@/lib/constants";
 import { createNotification } from "./notifications";
 import { rateLimit } from "@/lib/rate-limit";
 import { revalidatePath } from "next/cache";
@@ -75,8 +76,10 @@ export async function getTickets(filters?: {
 }) {
   const user = await requireAuth();
 
-  const page = Math.max(1, filters?.page ?? 1);
-  const pageSize = Math.min(50, Math.max(1, filters?.pageSize ?? 20));
+  const rawPage = Number(filters?.page);
+  const rawPageSize = Number(filters?.pageSize);
+  const page = Math.max(1, Number.isFinite(rawPage) ? Math.floor(rawPage) : 1);
+  const pageSize = Math.min(50, Math.max(1, Number.isFinite(rawPageSize) ? Math.floor(rawPageSize) : 20));
 
   const where: Record<string, unknown> = {};
 
@@ -163,11 +166,14 @@ export async function assignTicket(ticketId: string, technicianId: string) {
     where: { id: ticketId },
   });
   if (!ticket) return { error: "Ticket not found" };
+  if (ticket.status === "COMPLETED") return { error: "Cannot assign completed tickets" };
 
   const technician = await prisma.user.findUnique({
     where: { id: technicianId, role: ROLES.TECHNICIAN },
   });
   if (!technician) return { error: "Technician not found" };
+
+  const oldAssigneeId = ticket.assigneeId;
 
   await prisma.maintenanceTicket.update({
     where: { id: ticketId },
@@ -182,9 +188,21 @@ export async function assignTicket(ticketId: string, technicianId: string) {
       details: JSON.stringify({
         technicianName: technician.name,
         technicianId,
+        previousAssigneeId: oldAssigneeId ?? null,
       }),
     },
   });
+
+  // Notify old assignee about reassignment
+  if (oldAssigneeId && oldAssigneeId !== technicianId) {
+    await createNotification(
+      oldAssigneeId,
+      "Ticket Reassigned",
+      `You've been unassigned from: ${ticket.title}`,
+      "TICKET_ASSIGNED",
+      `/tickets/${ticketId}`
+    );
+  }
 
   await createNotification(
     technicianId,
@@ -203,6 +221,12 @@ export async function assignTicket(ticketId: string, technicianId: string) {
 export async function updateTicketStatus(ticketId: string, newStatus: string) {
   const user = await requireAuth();
 
+  // Validate enum value
+  const validStatuses = Object.values(TICKET_STATUS) as string[];
+  if (!validStatuses.includes(newStatus)) {
+    return { error: "Invalid status" };
+  }
+
   const ticket = await prisma.maintenanceTicket.findUnique({
     where: { id: ticketId },
     include: { submitter: { select: { id: true } } },
@@ -215,6 +239,16 @@ export async function updateTicketStatus(ticketId: string, newStatus: string) {
     return { error: `Cannot transition from ${ticket.status} to ${newStatus}` };
   }
 
+  // Cannot mark as ASSIGNED without an assignee
+  if (newStatus === "ASSIGNED" && !ticket.assigneeId) {
+    return { error: "Assign a technician first before changing status to Assigned" };
+  }
+
+  // Only managers can reopen completed tickets
+  if (ticket.status === "COMPLETED" && user.role === ROLES.TECHNICIAN) {
+    return { error: "Only managers can reopen completed tickets" };
+  }
+
   // Role-based transition permissions
   if (user.role === ROLES.TECHNICIAN) {
     if (ticket.assigneeId !== user.id) return { error: "Not your ticket" };
@@ -224,7 +258,14 @@ export async function updateTicketStatus(ticketId: string, newStatus: string) {
   }
 
   const updateData: Record<string, unknown> = { status: newStatus };
-  if (newStatus === "COMPLETED") updateData.completedAt = new Date();
+  if (newStatus === "COMPLETED") {
+    updateData.completedAt = new Date();
+  } else {
+    updateData.completedAt = null;
+  }
+  if (newStatus === "OPEN") {
+    updateData.assigneeId = null;
+  }
 
   await prisma.maintenanceTicket.update({
     where: { id: ticketId },
@@ -266,10 +307,19 @@ export async function updateTicketPriority(
 ) {
   const user = await requireRole(["MANAGER"]);
 
+  // Validate enum value
+  const validPriorities = Object.values(TICKET_PRIORITY) as string[];
+  if (!validPriorities.includes(newPriority)) {
+    return { error: "Invalid priority" };
+  }
+
   const ticket = await prisma.maintenanceTicket.findUnique({
     where: { id: ticketId },
   });
   if (!ticket) return { error: "Ticket not found" };
+  if (ticket.status === "COMPLETED") {
+    return { error: "Cannot change priority on completed tickets" };
+  }
 
   await prisma.maintenanceTicket.update({
     where: { id: ticketId },

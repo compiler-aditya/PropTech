@@ -13,10 +13,11 @@ export async function uploadFiles(ticketId: string, formData: FormData) {
   // Verify user has access to this ticket
   const ticket = await prisma.maintenanceTicket.findUnique({
     where: { id: ticketId },
-    select: { submitterId: true, assigneeId: true },
+    select: { submitterId: true, assigneeId: true, status: true },
   });
   if (!ticket) return { error: "Ticket not found" };
   if (!canAccessTicket(user, ticket)) return { error: "Access denied" };
+  if (ticket.status === "COMPLETED") return { error: "Cannot upload files to completed tickets" };
 
   const files = formData.getAll("files") as File[];
   if (files.length === 0) return { error: "No files selected" };
@@ -67,7 +68,7 @@ export async function removeFile(attachmentId: string) {
   const attachment = await prisma.fileAttachment.findUnique({
     where: { id: attachmentId },
     include: {
-      ticket: { select: { submitterId: true, assigneeId: true } },
+      ticket: { select: { submitterId: true, assigneeId: true, status: true } },
     },
   });
   if (!attachment) return { error: "Attachment not found" };
@@ -76,6 +77,7 @@ export async function removeFile(attachmentId: string) {
   const isUploader = attachment.uploadedBy === user.id;
   const hasTicketAccess = canAccessTicket(user, attachment.ticket);
   if (!isUploader && !hasTicketAccess) return { error: "Access denied" };
+  if (attachment.ticket.status === "COMPLETED") return { error: "Cannot delete files from completed tickets" };
 
   await deleteFile(attachment.storedName);
   await prisma.fileAttachment.delete({ where: { id: attachmentId } });

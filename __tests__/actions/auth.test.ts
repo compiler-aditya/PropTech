@@ -104,6 +104,27 @@ describe("auth actions", () => {
       expect(result).toEqual({ error: expect.stringContaining("Too many") });
       expect(mockSignIn).not.toHaveBeenCalled();
     });
+
+    it("normalizes email to lowercase", async () => {
+      mockSignIn.mockResolvedValue(undefined as never);
+
+      const formData = createMockFormData({
+        email: "Test@TEST.com",
+        password: "Password1",
+      });
+
+      try {
+        await loginAction(formData);
+      } catch {
+        // signIn may throw redirect
+      }
+
+      expect(mockSignIn).toHaveBeenCalledWith("credentials", {
+        email: "test@test.com",
+        password: "Password1",
+        redirectTo: "/dashboard",
+      });
+    });
   });
 
   describe("registerAction", () => {
@@ -245,6 +266,29 @@ describe("auth actions", () => {
 
       expect(result).toEqual({ error: expect.stringContaining("Too many") });
       expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it("normalizes email to lowercase before registration", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.create.mockResolvedValue({} as never);
+      mockSignIn.mockResolvedValue(undefined as never);
+
+      const formData = createMockFormData({
+        name: "John Doe",
+        email: "John@Test.COM",
+        password: "Password1",
+        role: "TENANT",
+      });
+
+      try {
+        await registerAction(formData);
+      } catch {
+        // signIn may throw redirect
+      }
+
+      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ email: "john@test.com" }),
+      });
     });
   });
 
