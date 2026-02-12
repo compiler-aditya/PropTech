@@ -2,6 +2,11 @@
 
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
+import { NOTIFICATION_TYPE } from "@/lib/constants";
+
+// Internal helper — not directly callable as a server action by clients.
+// Only called by other server actions (tickets, comments) to create notifications.
+const VALID_TYPES = new Set(Object.values(NOTIFICATION_TYPE));
 
 export async function createNotification(
   userId: string,
@@ -10,6 +15,9 @@ export async function createNotification(
   type: string,
   linkUrl?: string
 ) {
+  if (!VALID_TYPES.has(type as (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE])) {
+    throw new Error(`Invalid notification type: ${type}`);
+  }
   return prisma.notification.create({
     data: { userId, title, message, type, linkUrl },
   });
@@ -37,6 +45,7 @@ export async function markAsRead(notificationId: string) {
     where: { id: notificationId, userId: user.id },
     data: { isRead: true },
   });
+  return { success: true };
 }
 
 export async function markAllAsRead() {
@@ -45,4 +54,5 @@ export async function markAllAsRead() {
     where: { userId: user.id, isRead: false },
     data: { isRead: true },
   });
+  return { success: true };
 }

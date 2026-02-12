@@ -6,6 +6,7 @@ const roleRouteAccess: Record<string, string[]> = {
   "/tickets/new": ["TENANT"],
   "/properties": ["MANAGER"],
   "/users": ["MANAGER"],
+  "/properties/new": ["MANAGER"],
 };
 
 const publicPaths = ["/login", "/register"];
@@ -14,7 +15,7 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   const { pathname } = req.nextUrl;
   const isAuthenticated = !!token;
-  const userRole = token?.role as string | undefined;
+  const userRole = token?.role ? String(token.role) : undefined;
 
   // Allow public paths
   if (publicPaths.some((p) => pathname.startsWith(p))) {
@@ -49,6 +50,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|uploads/).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|icon.svg|uploads/).*)",
   ],
 };

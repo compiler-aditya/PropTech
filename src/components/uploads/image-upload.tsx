@@ -3,8 +3,8 @@
 import { useState, useTransition, useRef } from "react";
 import { uploadFiles } from "@/actions/uploads";
 import { Button } from "@/components/ui/button";
-import { UPLOAD } from "@/lib/constants";
 import { formatFileSize } from "@/lib/utils";
+import { validateUploadFile } from "@/lib/upload-validation";
 import { Upload, X, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,12 +16,9 @@ export function ImageUpload({ ticketId }: { ticketId: string }) {
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
     const valid = files.filter((file) => {
-      if (!UPLOAD.ALLOWED_TYPES.includes(file.type as (typeof UPLOAD.ALLOWED_TYPES)[number])) {
-        toast.error(`${file.name}: Invalid file type`);
-        return false;
-      }
-      if (file.size > UPLOAD.MAX_FILE_SIZE) {
-        toast.error(`${file.name}: File too large (max 5MB)`);
+      const error = validateUploadFile(file);
+      if (error) {
+        toast.error(error);
         return false;
       }
       return true;

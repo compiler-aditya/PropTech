@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PropTech Maintenance",
   description: "Property maintenance management system",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

@@ -6,6 +6,33 @@ import { UPLOAD } from "./constants";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
+// Map MIME types to safe extensions (never trust user-provided extensions)
+const MIME_TO_EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
+
+// Magic byte signatures for image validation
+const MAGIC_BYTES: Record<string, number[][]> = {
+  "image/jpeg": [[0xff, 0xd8, 0xff]],
+  "image/png": [[0x89, 0x50, 0x4e, 0x47]],
+  "image/gif": [
+    [0x47, 0x49, 0x46, 0x38, 0x37], // GIF87a
+    [0x47, 0x49, 0x46, 0x38, 0x39], // GIF89a
+  ],
+  "image/webp": [[0x52, 0x49, 0x46, 0x46]], // RIFF
+};
+
+function validateMagicBytes(buffer: Buffer, mimeType: string): boolean {
+  const signatures = MAGIC_BYTES[mimeType];
+  if (!signatures) return false;
+  return signatures.some((sig) =>
+    sig.every((byte, i) => buffer.length > i && buffer[i] === byte)
+  );
+}
+
 async function ensureUploadDir() {
   if (!existsSync(UPLOAD_DIR)) {
     await mkdir(UPLOAD_DIR, { recursive: true });
@@ -26,13 +53,20 @@ export async function saveFile(file: File): Promise<{
     throw new Error("File too large. Maximum size is 5MB.");
   }
 
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  // Validate file content matches claimed MIME type
+  if (!validateMagicBytes(buffer, file.type)) {
+    throw new Error("File content does not match its type. Upload rejected.");
+  }
+
   await ensureUploadDir();
 
-  const ext = file.name.split(".").pop() || "jpg";
+  // Derive extension from validated MIME type, never from user-provided filename
+  const ext = MIME_TO_EXT[file.type] || "bin";
   const storedName = `${uuidv4()}.${ext}`;
   const filePath = path.join(UPLOAD_DIR, storedName);
 
-  const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(filePath, buffer);
 
   return {

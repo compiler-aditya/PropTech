@@ -37,7 +37,7 @@ model Property {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  manager User                @relation("PropertyManager", fields: [managerId], references: [id])
+  manager User                @relation("PropertyManager", fields: [managerId], references: [id], onDelete: Restrict)
   tickets MaintenanceTicket[]
 
   @@index([managerId])
@@ -130,6 +130,5 @@ model Notification {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, isRead])
-  @@index([userId, createdAt])
+  @@index([userId, isRead, createdAt])
 }

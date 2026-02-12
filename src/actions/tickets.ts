@@ -5,10 +5,14 @@ import { requireAuth, requireRole } from "@/lib/auth-utils";
 import { createTicketSchema } from "@/lib/validations/ticket";
 import { VALID_TRANSITIONS, ROLES } from "@/lib/constants";
 import { createNotification } from "./notifications";
+import { rateLimit } from "@/lib/rate-limit";
 import { revalidatePath } from "next/cache";
 
 export async function createTicket(formData: FormData) {
   const user = await requireRole(["TENANT"]);
+
+  const rl = rateLimit(`ticket:${user.id}`, { maxAttempts: 10, windowMs: 60 * 60 * 1000 });
+  if (!rl.success) return { error: "Too many tickets. Please try again later." };
 
   const raw = {
     title: formData.get("title") as string,
@@ -45,15 +49,17 @@ export async function createTicket(formData: FormData) {
     where: { role: ROLES.MANAGER },
     select: { id: true },
   });
-  for (const manager of managers) {
-    await createNotification(
-      manager.id,
-      "New Ticket Created",
-      `${user.name} submitted: ${ticket.title}`,
-      "TICKET_CREATED",
-      `/tickets/${ticket.id}`
-    );
-  }
+  await Promise.all(
+    managers.map((manager) =>
+      createNotification(
+        manager.id,
+        "New Ticket Created",
+        `${user.name} submitted: ${ticket.title}`,
+        "TICKET_CREATED",
+        `/tickets/${ticket.id}`
+      )
+    )
+  );
 
   revalidatePath("/tickets");
   revalidatePath("/dashboard");
@@ -64,8 +70,13 @@ export async function getTickets(filters?: {
   status?: string;
   priority?: string;
   search?: string;
+  page?: number;
+  pageSize?: number;
 }) {
   const user = await requireAuth();
+
+  const page = Math.max(1, filters?.page ?? 1);
+  const pageSize = Math.min(50, Math.max(1, filters?.pageSize ?? 20));
 
   const where: Record<string, unknown> = {};
 
@@ -79,22 +90,30 @@ export async function getTickets(filters?: {
   if (filters?.status) where.status = filters.status;
   if (filters?.priority) where.priority = filters.priority;
   if (filters?.search) {
+    const search = filters.search.slice(0, 100);
     where.OR = [
-      { title: { contains: filters.search } },
-      { description: { contains: filters.search } },
+      { title: { contains: search } },
+      { description: { contains: search } },
     ];
   }
 
-  return prisma.maintenanceTicket.findMany({
-    where,
-    include: {
-      property: { select: { name: true } },
-      submitter: { select: { name: true } },
-      assignee: { select: { name: true } },
-      _count: { select: { comments: true, attachments: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const [tickets, total] = await Promise.all([
+    prisma.maintenanceTicket.findMany({
+      where,
+      include: {
+        property: { select: { name: true } },
+        submitter: { select: { name: true } },
+        assignee: { select: { name: true } },
+        _count: { select: { comments: true, attachments: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+    }),
+    prisma.maintenanceTicket.count({ where }),
+  ]);
+
+  return { tickets, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
 }
 
 export async function getTicketById(id: string) {

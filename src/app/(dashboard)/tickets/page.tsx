@@ -16,7 +16,7 @@ export default async function TicketsPage({
   const user = await requireAuth();
   const params = await searchParams;
 
-  const tickets = await getTickets({
+  const { tickets, total, page, totalPages } = await getTickets({
     status: params.status,
     priority: params.priority,
     search: params.search,
@@ -28,7 +28,7 @@ export default async function TicketsPage({
         <div>
           <h1 className="text-2xl font-bold">Tickets</h1>
           <p className="text-sm text-muted-foreground">
-            {tickets.length} ticket{tickets.length !== 1 ? "s" : ""}
+            {total} ticket{total !== 1 ? "s" : ""}
           </p>
         </div>
         {user.role === ROLES.TENANT && (
@@ -65,6 +65,28 @@ export default async function TicketsPage({
           {user.role === ROLES.TENANT && (
             <Link href="/tickets/new" className="mt-4 inline-block">
               <Button>Submit Your First Request</Button>
+            </Link>
+          )}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          {page > 1 && (
+            <Link
+              href={{ query: { ...params, page: page - 1 } }}
+            >
+              <Button variant="outline" size="sm">Previous</Button>
+            </Link>
+          )}
+          <span className="text-sm text-muted-foreground">
+            Page {page} of {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link
+              href={{ query: { ...params, page: page + 1 } }}
+            >
+              <Button variant="outline" size="sm">Next</Button>
             </Link>
           )}
         </div>

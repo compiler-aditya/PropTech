@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireAuth, canAccessTicket } from "@/lib/auth-utils";
 import { createNotification } from "./notifications";
 import { revalidatePath } from "next/cache";
 
@@ -22,6 +22,9 @@ export async function addComment(ticketId: string, content: string) {
     },
   });
   if (!ticket) return { error: "Ticket not found" };
+
+  // Verify user has access to this ticket
+  if (!canAccessTicket(user, ticket)) return { error: "Access denied" };
 
   await prisma.ticketComment.create({
     data: {

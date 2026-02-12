@@ -2,12 +2,21 @@
 
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
+import { canAccessTicket } from "@/lib/auth-utils";
 import { saveFile, deleteFile } from "@/lib/upload";
-import { UPLOAD } from "@/lib/constants";
+import { UPLOAD, ROLES } from "@/lib/constants";
 import { revalidatePath } from "next/cache";
 
 export async function uploadFiles(ticketId: string, formData: FormData) {
   const user = await requireAuth();
+
+  // Verify user has access to this ticket
+  const ticket = await prisma.maintenanceTicket.findUnique({
+    where: { id: ticketId },
+    select: { submitterId: true, assigneeId: true },
+  });
+  if (!ticket) return { error: "Ticket not found" };
+  if (!canAccessTicket(user, ticket)) return { error: "Access denied" };
 
   const files = formData.getAll("files") as File[];
   if (files.length === 0) return { error: "No files selected" };
@@ -57,8 +66,16 @@ export async function removeFile(attachmentId: string) {
 
   const attachment = await prisma.fileAttachment.findUnique({
     where: { id: attachmentId },
+    include: {
+      ticket: { select: { submitterId: true, assigneeId: true } },
+    },
   });
   if (!attachment) return { error: "Attachment not found" };
+
+  // Only uploader, ticket participants, or managers can delete
+  const isUploader = attachment.uploadedBy === user.id;
+  const hasTicketAccess = canAccessTicket(user, attachment.ticket);
+  if (!isUploader && !hasTicketAccess) return { error: "Access denied" };
 
   await deleteFile(attachment.storedName);
   await prisma.fileAttachment.delete({ where: { id: attachmentId } });

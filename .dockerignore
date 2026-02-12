@@ -2,8 +2,12 @@ node_modules
 .next
 .git
 *.md
+.env
 .env.local
 .env.production.local
+__tests__
+vitest.config.ts
+.claude
 prisma/dev.db
 prisma/dev.db-journal
 dev.db

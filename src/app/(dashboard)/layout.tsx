@@ -1,6 +1,6 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { AppShell } from "@/components/layout/app-shell";
-import prisma from "@/lib/prisma";
+import { getUnreadCount } from "@/actions/notifications";
 
 export default async function DashboardLayout({
   children,
@@ -8,10 +8,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const user = await requireAuth();
-
-  const unreadCount = await prisma.notification.count({
-    where: { userId: user.id, isRead: false },
-  });
+  const unreadCount = await getUnreadCount();
 
   return (
     <AppShell

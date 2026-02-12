@@ -7,12 +7,18 @@ services:
       - "3000:3000"
     environment:
       - DATABASE_URL=file:/app/data/proptech.db
-      - NEXTAUTH_SECRET=proptech-docker-secret-change-in-production
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?Set NEXTAUTH_SECRET in .env}
       - NEXTAUTH_URL=http://localhost:3000
     volumes:
       - db-data:/app/data
       - uploads:/app/public/uploads
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 volumes:
   db-data:
