@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:/app/data/proptech.db
+      - NEXTAUTH_SECRET=proptech-docker-secret-change-in-production
+      - NEXTAUTH_URL=http://localhost:3000
+    volumes:
+      - db-data:/app/data
+      - uploads:/app/public/uploads
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  uploads:

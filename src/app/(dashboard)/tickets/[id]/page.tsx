@@ -13,6 +13,7 @@ import { ActivityLog } from "@/components/tickets/activity-log";
 import { CommentSection } from "@/components/tickets/comment-section";
 import { AssignDialog } from "@/components/tickets/assign-dialog";
 import { StatusActions } from "@/components/tickets/status-actions";
+import { ImageUpload } from "@/components/uploads/image-upload";
 import { CATEGORY_LABELS, ROLES } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
 import { ArrowLeft, Building2, User, Calendar, Tag } from "lucide-react";
@@ -124,6 +125,18 @@ export default async function TicketDetailPage({
                     </a>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Upload */}
+          {ticket.status !== "COMPLETED" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Upload Images</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ImageUpload ticketId={ticket.id} />
               </CardContent>
             </Card>
           )}

@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PropTech - Property Maintenance Management System
 
-## Getting Started
+A mobile-first web application for managing property maintenance requests. Tenants report issues, managers assign and track work, and technicians resolve tasks efficiently.
 
-First, run the development server:
+## Features
+
+- **Role-Based Access**: Tenant, Property Manager, and Technician roles with different permissions
+- **Ticket Workflow**: Open → Assigned → In Progress → Completed with enforced transitions
+- **Dashboard**: Role-specific stats and recent tickets overview
+- **Activity Log**: Complete audit trail per ticket (created, assigned, status changes, comments)
+- **Comments**: Threaded comments with participant notifications
+- **File Uploads**: Image attachments on tickets (JPEG, PNG, WebP, GIF up to 5MB)
+- **In-App Notifications**: Real-time notification bell with unread count
+- **Mobile-First**: Responsive design with bottom tabs on mobile, sidebar on desktop
+- **Demo Quick-Login**: One-click login for each role
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router) + TypeScript |
+| Database | SQLite via Prisma ORM |
+| Auth | NextAuth.js v5 (JWT + Credentials) |
+| UI | shadcn/ui + TailwindCSS |
+| Validation | Zod |
+| Icons | Lucide React |
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 18+ and npm
+
+### Setup
 
 ```bash
+# Clone the repository
+git clone https://github.com/compiler-aditya/PropTech.git
+cd PropTech
+
+# Install dependencies
+npm install
+
+# Generate Prisma client
+npx prisma generate
+
+# Run database migrations
+npx prisma migrate dev
+
+# Seed demo data
+npx tsx prisma/seed.ts
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Docker
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+docker compose up --build
+```
 
-## Learn More
+The app will be available at [http://localhost:3000](http://localhost:3000).
 
-To learn more about Next.js, take a look at the following resources:
+## Demo Accounts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+All passwords: `password123`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Role | Email | What You Can Do |
+|------|-------|----------------|
+| Tenant | sarah@demo.com | Submit requests, track your tickets, add comments |
+| Tenant | mike@demo.com | Submit requests, track your tickets |
+| Manager | admin@demo.com | View all tickets, assign technicians, manage properties |
+| Technician | john@demo.com | View assigned tasks, update status, add comments |
+| Technician | lisa@demo.com | View assigned tasks, update status |
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── (auth)/             # Login, Register (public)
+│   ├── (dashboard)/        # Dashboard, Tickets, Properties, etc. (protected)
+│   └── api/auth/           # NextAuth API handler
+├── actions/                # Server Actions (tickets, auth, comments, uploads, etc.)
+├── components/
+│   ├── ui/                 # shadcn/ui primitives
+│   ├── layout/             # App shell, sidebar, mobile nav, header
+│   ├── tickets/            # Ticket card, form, filters, status actions, activity log
+│   ├── notifications/      # Notification list
+│   ├── uploads/            # Image upload component
+│   └── auth/               # Login form, demo login, register form
+├── lib/                    # Prisma client, auth config, validations, utilities
+└── middleware.ts           # Route protection + role-based access
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Architecture Decisions
+
+- **Server Actions over API routes** for type-safe mutations without a separate API layer
+- **JWT sessions** (required for CredentialsProvider) with role injection in callbacks
+- **SQLite** for zero-config deployment — appropriate for this scale, ships with the app
+- **Local filesystem uploads** in `public/uploads/` — simplest approach for demo/challenge
+- **Activity log as separate table** for reliable audit trails without event sourcing complexity
+- **Zod validation** at server action boundaries for runtime type safety
+
+## Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run start` | Start production server |
+| `npm run db:seed` | Seed demo data |
+| `npm run db:migrate` | Run migrations |
+| `npm run db:studio` | Open Prisma Studio |
+| `npm run test` | Run tests |
