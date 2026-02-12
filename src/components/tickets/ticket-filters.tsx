@@ -33,10 +33,12 @@ export function TicketFilters() {
   const hasFilters =
     searchParams.has("status") ||
     searchParams.has("priority") ||
-    searchParams.has("search");
+    searchParams.has("search") ||
+    searchParams.has("dateFrom") ||
+    searchParams.has("dateTo");
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2">
+    <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
       <Input
         placeholder="Search tickets..."
         defaultValue={searchParams.get("search") || ""}
@@ -76,6 +78,23 @@ export function TicketFilters() {
           <SelectItem value="URGENT">Urgent</SelectItem>
         </SelectContent>
       </Select>
+      <div className="flex items-center gap-1.5">
+        <Input
+          type="date"
+          value={searchParams.get("dateFrom") || ""}
+          onChange={(e) => updateFilter("dateFrom", e.target.value)}
+          className="sm:w-[145px] text-sm"
+          placeholder="From"
+        />
+        <span className="text-xs text-muted-foreground">to</span>
+        <Input
+          type="date"
+          value={searchParams.get("dateTo") || ""}
+          onChange={(e) => updateFilter("dateTo", e.target.value)}
+          className="sm:w-[145px] text-sm"
+          placeholder="To"
+        />
+      </div>
       {hasFilters && (
         <Button variant="ghost" size="icon" onClick={clearFilters}>
           <X className="h-4 w-4" />
