@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("TENANT") // TENANT | MANAGER | TECHNICIAN
+  phone     String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  submittedTickets  MaintenanceTicket[] @relation("TicketSubmitter")
+  assignedTickets   MaintenanceTicket[] @relation("TicketAssignee")
+  activityLogs      TicketActivityLog[]
+  comments          TicketComment[]
+  notifications     Notification[]
+  managedProperties Property[]          @relation("PropertyManager")
+
+  @@index([role])
+  @@index([email])
+}
+
+model Property {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  managerId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  manager User                @relation("PropertyManager", fields: [managerId], references: [id])
+  tickets MaintenanceTicket[]
+
+  @@index([managerId])
+}
+
+model MaintenanceTicket {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  status      String    @default("OPEN") // OPEN | ASSIGNED | IN_PROGRESS | COMPLETED
+  priority    String    @default("MEDIUM") // LOW | MEDIUM | HIGH | URGENT
+  category    String    @default("OTHER") // PLUMBING | ELECTRICAL | HVAC | APPLIANCE | STRUCTURAL | PEST_CONTROL | OTHER
+  unitNumber  String?
+
+  propertyId  String
+  submitterId String
+  assigneeId  String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  property    Property          @relation(fields: [propertyId], references: [id])
+  submitter   User              @relation("TicketSubmitter", fields: [submitterId], references: [id])
+  assignee    User?             @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  activityLog TicketActivityLog[]
+  comments    TicketComment[]
+  attachments FileAttachment[]
+
+  @@index([status])
+  @@index([priority])
+  @@index([submitterId])
+  @@index([assigneeId])
+  @@index([propertyId])
+}
+
+model TicketActivityLog {
+  id          String   @id @default(cuid())
+  action      String // CREATED | STATUS_CHANGED | ASSIGNED | PRIORITY_CHANGED | COMMENTED | ATTACHMENT_ADDED
+  details     String? // JSON string
+  ticketId    String
+  performedBy String
+  createdAt   DateTime @default(now())
+
+  ticket MaintenanceTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User              @relation(fields: [performedBy], references: [id])
+
+  @@index([ticketId])
+  @@index([performedBy])
+}
+
+model TicketComment {
+  id        String   @id @default(cuid())
+  content   String
+  ticketId  String
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ticket MaintenanceTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User              @relation(fields: [authorId], references: [id])
+
+  @@index([ticketId])
+}
+
+model FileAttachment {
+  id         String   @id @default(cuid())
+  filename   String
+  storedName String
+  mimeType   String
+  size       Int
+  ticketId   String
+  uploadedBy String
+  createdAt  DateTime @default(now())
+
+  ticket MaintenanceTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String // TICKET_CREATED | TICKET_ASSIGNED | STATUS_CHANGED | COMMENT_ADDED
+  isRead    Boolean  @default(false)
+  linkUrl   String?
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+}
