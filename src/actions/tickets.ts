@@ -71,6 +71,8 @@ export async function getTickets(filters?: {
   status?: string;
   priority?: string;
   search?: string;
+  dateFrom?: string;
+  dateTo?: string;
   page?: number;
   pageSize?: number;
 }) {
@@ -98,6 +100,21 @@ export async function getTickets(filters?: {
       { title: { contains: search } },
       { description: { contains: search } },
     ];
+  }
+  if (filters?.dateFrom || filters?.dateTo) {
+    const createdAt: Record<string, Date> = {};
+    if (filters.dateFrom) {
+      const from = new Date(filters.dateFrom);
+      if (!isNaN(from.getTime())) createdAt.gte = from;
+    }
+    if (filters.dateTo) {
+      const to = new Date(filters.dateTo);
+      if (!isNaN(to.getTime())) {
+        to.setHours(23, 59, 59, 999);
+        createdAt.lte = to;
+      }
+    }
+    if (Object.keys(createdAt).length > 0) where.createdAt = createdAt;
   }
 
   const [tickets, total] = await Promise.all([

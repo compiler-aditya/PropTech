@@ -11,7 +11,7 @@ import { ROLES } from "@/lib/constants";
 export default async function TicketsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; priority?: string; search?: string }>;
+  searchParams: Promise<{ status?: string; priority?: string; search?: string; dateFrom?: string; dateTo?: string }>;
 }) {
   const user = await requireAuth();
   const params = await searchParams;
@@ -20,6 +20,8 @@ export default async function TicketsPage({
     status: params.status,
     priority: params.priority,
     search: params.search,
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
   });
 
   return (
@@ -48,7 +50,7 @@ export default async function TicketsPage({
       </Suspense>
 
       {tickets.length > 0 ? (
-        <div className="space-y-4">
+        <div className="grid gap-4">
           {tickets.map((ticket) => (
             <TicketCard key={ticket.id} ticket={ticket} />
           ))}

@@ -17,14 +17,16 @@ interface ActivityEntry {
   user: { name: string; role: string };
 }
 
-const actionIcons: Record<string, React.ElementType> = {
-  CREATED: CirclePlus,
-  STATUS_CHANGED: ArrowRightLeft,
-  ASSIGNED: UserPlus,
-  PRIORITY_CHANGED: AlertTriangle,
-  COMMENTED: MessageSquare,
-  ATTACHMENT_ADDED: Paperclip,
+const actionConfig: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
+  CREATED: { icon: CirclePlus, color: "text-emerald-600", bg: "bg-emerald-50" },
+  STATUS_CHANGED: { icon: ArrowRightLeft, color: "text-blue-600", bg: "bg-blue-50" },
+  ASSIGNED: { icon: UserPlus, color: "text-violet-600", bg: "bg-violet-50" },
+  PRIORITY_CHANGED: { icon: AlertTriangle, color: "text-amber-600", bg: "bg-amber-50" },
+  COMMENTED: { icon: MessageSquare, color: "text-sky-600", bg: "bg-sky-50" },
+  ATTACHMENT_ADDED: { icon: Paperclip, color: "text-rose-600", bg: "bg-rose-50" },
 };
+
+const defaultConfig = { icon: CirclePlus, color: "text-gray-600", bg: "bg-gray-100" };
 
 function getDescription(action: string, details: string | null, userName: string): string {
   const parsed = details ? JSON.parse(details) : {};
@@ -55,13 +57,15 @@ export function ActivityLog({ entries }: { entries: ActivityEntry[] }) {
 
   return (
     <div className="space-y-3">
-      {entries.map((entry) => {
-        const Icon = actionIcons[entry.action] || CirclePlus;
+      {entries.map((entry, index) => {
+        const config = actionConfig[entry.action] || defaultConfig;
+        const Icon = config.icon;
+        const isLatest = index === 0;
         return (
-          <div key={entry.id} className="flex gap-3 text-sm">
+          <div key={entry.id} className={`flex gap-3 text-sm ${isLatest ? "ring-1 ring-blue-200 rounded-lg p-2 bg-blue-50/30" : ""}`}>
             <div className="mt-0.5">
-              <div className="h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center">
-                <Icon className="h-3.5 w-3.5 text-gray-600" />
+              <div className={`h-7 w-7 rounded-full ${config.bg} flex items-center justify-center`}>
+                <Icon className={`h-3.5 w-3.5 ${config.color}`} />
               </div>
             </div>
             <div className="flex-1 min-w-0">
