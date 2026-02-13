@@ -13,7 +13,7 @@ COPY . .
 
 RUN npx prisma generate
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV DATABASE_URL="file:./dev.db"
+ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
 RUN npm run build
 
 # Stage 3: Production
@@ -35,8 +35,8 @@ COPY --from=builder /app/package.json ./package.json
 # Production deps only (for prisma migrate)
 COPY --from=deps /app/node_modules ./node_modules
 
-RUN mkdir -p public/uploads data && \
-    chown -R nextjs:nodejs public/uploads data .next
+RUN mkdir -p public/uploads && \
+    chown -R nextjs:nodejs public/uploads .next
 
 USER nextjs
 

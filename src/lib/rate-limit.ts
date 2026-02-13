@@ -1,6 +1,6 @@
 /**
  * Simple in-memory rate limiter using a sliding window.
- * Suitable for single-process deployments (SQLite / standalone Next.js).
+ * Suitable for single-process deployments (standalone Next.js).
  */
 
 interface RateLimitEntry {

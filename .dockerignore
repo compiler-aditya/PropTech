@@ -8,8 +8,5 @@ node_modules
 __tests__
 vitest.config.ts
 
-prisma/dev.db
-prisma/dev.db-journal
-dev.db
 public/uploads/*
 !public/uploads/.gitkeep

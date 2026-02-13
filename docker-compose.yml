@@ -1,17 +1,36 @@
 version: "3.8"
 
 services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=proptech
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-proptech}
+      - POSTGRES_DB=proptech
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U proptech"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     build: .
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=file:/app/data/proptech.db
+      - DATABASE_URL=postgresql://proptech:${POSTGRES_PASSWORD:-proptech}@db:5432/proptech
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?Set NEXTAUTH_SECRET in .env}
       - NEXTAUTH_URL=http://localhost:3000
     volumes:
-      - db-data:/app/data
       - uploads:/app/public/uploads
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-q", "-O-", "http://localhost:3000"]
@@ -21,5 +40,5 @@ services:
       start_period: 10s
 
 volumes:
-  db-data:
+  pgdata:
   uploads:
