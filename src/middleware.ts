@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth";
 
 const roleRouteAccess: Record<string, string[]> = {
   "/tickets/new": ["TENANT"],
@@ -11,11 +10,10 @@ const roleRouteAccess: Record<string, string[]> = {
 
 const publicPaths = ["/login", "/register"];
 
-export async function middleware(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+export default auth((req) => {
   const { pathname } = req.nextUrl;
-  const isAuthenticated = !!token;
-  const userRole = token?.role ? String(token.role) : undefined;
+  const isAuthenticated = !!req.auth;
+  const userRole = req.auth?.user?.role;
 
   // Allow public paths
   if (publicPaths.some((p) => pathname.startsWith(p))) {
@@ -46,7 +44,7 @@ export async function middleware(req: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [
