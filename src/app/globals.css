@@ -126,3 +126,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes logo-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.92); }
+}
+
+.animate-logo-pulse {
+  animation: logo-pulse 1.5s ease-in-out infinite;
+}
