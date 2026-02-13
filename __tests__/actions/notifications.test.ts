@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { requireAuth } from "@/lib/auth-utils";
 import prisma from "@/lib/prisma";
+import { sendNotificationEmail } from "@/lib/email";
 import {
   createNotification,
   getNotifications,
@@ -12,6 +13,7 @@ import { createMockUser } from "../helpers";
 
 const mockRequireAuth = vi.mocked(requireAuth);
 const mockPrisma = vi.mocked(prisma, true);
+const mockSendEmail = vi.mocked(sendNotificationEmail);
 
 describe("notifications actions", () => {
   const user = createMockUser({ id: "user-1" });
@@ -69,6 +71,46 @@ describe("notifications actions", () => {
       await expect(
         createNotification("user-1", "Title", "Message", "INVALID_TYPE")
       ).rejects.toThrow("Invalid notification type: INVALID_TYPE");
+    });
+
+    it("sends email to user after creating notification", async () => {
+      mockPrisma.notification.create.mockResolvedValue({} as never);
+      mockPrisma.user.findUnique.mockResolvedValue({
+        email: "sarah@demo.com",
+      } as never);
+
+      await createNotification(
+        "user-1",
+        "Ticket Assigned",
+        "You have been assigned a ticket",
+        "TICKET_ASSIGNED",
+        "/tickets/abc"
+      );
+
+      // Allow fire-and-forget promise to resolve
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(mockSendEmail).toHaveBeenCalledWith(
+        "sarah@demo.com",
+        "Ticket Assigned",
+        "You have been assigned a ticket",
+        "/tickets/abc"
+      );
+    });
+
+    it("still creates notification if user email lookup fails", async () => {
+      mockPrisma.notification.create.mockResolvedValue({} as never);
+      mockPrisma.user.findUnique.mockRejectedValue(new Error("DB error"));
+
+      const result = await createNotification(
+        "user-1",
+        "Test",
+        "Test message",
+        "TICKET_CREATED"
+      );
+
+      expect(result).toBeDefined();
+      expect(mockSendEmail).not.toHaveBeenCalled();
     });
   });
 
