@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
+
+const { auth } = NextAuth(authConfig);
 
 const roleRouteAccess: Record<string, string[]> = {
   "/tickets/new": ["TENANT"],
