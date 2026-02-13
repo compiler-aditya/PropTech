@@ -38,7 +38,7 @@ export function TicketFilters() {
     searchParams.has("dateTo");
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
+    <div className="space-y-2 sm:space-y-0 sm:flex sm:flex-row sm:gap-2 sm:flex-wrap">
       <Input
         placeholder="Search tickets..."
         defaultValue={searchParams.get("search") || ""}
@@ -48,50 +48,52 @@ export function TicketFilters() {
         }}
         className="sm:max-w-[200px]"
       />
-      <Select
-        value={searchParams.get("status") || "ALL"}
-        onValueChange={(v) => updateFilter("status", v)}
-      >
-        <SelectTrigger className="sm:w-[150px]">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL">All Status</SelectItem>
-          <SelectItem value="OPEN">Open</SelectItem>
-          <SelectItem value="ASSIGNED">Assigned</SelectItem>
-          <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-          <SelectItem value="COMPLETED">Completed</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select
-        value={searchParams.get("priority") || "ALL"}
-        onValueChange={(v) => updateFilter("priority", v)}
-      >
-        <SelectTrigger className="sm:w-[150px]">
-          <SelectValue placeholder="Priority" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL">All Priority</SelectItem>
-          <SelectItem value="LOW">Low</SelectItem>
-          <SelectItem value="MEDIUM">Medium</SelectItem>
-          <SelectItem value="HIGH">High</SelectItem>
-          <SelectItem value="URGENT">Urgent</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
+        <Select
+          value={searchParams.get("status") || "ALL"}
+          onValueChange={(v) => updateFilter("status", v)}
+        >
+          <SelectTrigger className="sm:w-[150px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Status</SelectItem>
+            <SelectItem value="OPEN">Open</SelectItem>
+            <SelectItem value="ASSIGNED">Assigned</SelectItem>
+            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+            <SelectItem value="COMPLETED">Completed</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={searchParams.get("priority") || "ALL"}
+          onValueChange={(v) => updateFilter("priority", v)}
+        >
+          <SelectTrigger className="sm:w-[150px]">
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Priority</SelectItem>
+            <SelectItem value="LOW">Low</SelectItem>
+            <SelectItem value="MEDIUM">Medium</SelectItem>
+            <SelectItem value="HIGH">High</SelectItem>
+            <SelectItem value="URGENT">Urgent</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       <div className="flex items-center gap-1.5">
         <Input
           type="date"
           value={searchParams.get("dateFrom") || ""}
           onChange={(e) => updateFilter("dateFrom", e.target.value)}
-          className="sm:w-[145px] text-sm"
+          className="min-w-0 flex-1 sm:flex-none sm:w-[145px] text-sm"
           placeholder="From"
         />
-        <span className="text-xs text-muted-foreground">to</span>
+        <span className="text-xs text-muted-foreground shrink-0">to</span>
         <Input
           type="date"
           value={searchParams.get("dateTo") || ""}
           onChange={(e) => updateFilter("dateTo", e.target.value)}
-          className="sm:w-[145px] text-sm"
+          className="min-w-0 flex-1 sm:flex-none sm:w-[145px] text-sm"
           placeholder="To"
         />
       </div>
