@@ -5,6 +5,8 @@ import prisma from "./prisma";
 import { loginSchema } from "./validations/auth";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true,
   providers: [
     Credentials({
       credentials: {
