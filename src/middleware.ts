@@ -12,8 +12,7 @@ const roleRouteAccess: Record<string, string[]> = {
 const publicPaths = ["/login", "/register"];
 
 export async function middleware(req: NextRequest) {
-  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
-  const token = await getToken({ req, secret });
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   const { pathname } = req.nextUrl;
   const isAuthenticated = !!token;
   const userRole = token?.role ? String(token.role) : undefined;
