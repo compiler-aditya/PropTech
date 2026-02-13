@@ -19,7 +19,7 @@ A mobile-first web application for managing property maintenance requests. Tenan
 | Layer | Technology |
 |-------|-----------|
 | Framework | Next.js 16 (App Router) + TypeScript |
-| Database | SQLite via Prisma ORM |
+| Database | PostgreSQL via Prisma ORM |
 | Auth | NextAuth.js v5 (JWT + Credentials) |
 | UI | shadcn/ui + TailwindCSS |
 | Validation | Zod |
@@ -100,7 +100,7 @@ src/
 
 - **Server Actions over API routes** for type-safe mutations without a separate API layer
 - **JWT sessions** (required for CredentialsProvider) with role injection in callbacks
-- **SQLite** for zero-config deployment — appropriate for this scale, ships with the app
+- **PostgreSQL** for production-ready relational storage with Prisma ORM
 - **Local filesystem uploads** in `public/uploads/` — simplest approach for demo/challenge
 - **Activity log as separate table** for reliable audit trails without event sourcing complexity
 - **Zod validation** at server action boundaries for runtime type safety
