@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
 import { NOTIFICATION_TYPE } from "@/lib/constants";
+import { sendNotificationEmail } from "@/lib/email";
 
 // Internal helper — not directly callable as a server action by clients.
 // Only called by other server actions (tickets, comments) to create notifications.
@@ -18,6 +19,19 @@ export async function createNotification(
   if (!VALID_TYPES.has(type as (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE])) {
     throw new Error(`Invalid notification type: ${type}`);
   }
+  // Fire-and-forget email: look up user email, then send
+  Promise.resolve(
+    prisma.user.findUnique({ where: { id: userId }, select: { email: true } })
+  )
+    .then((user) => {
+      if (user?.email) {
+        sendNotificationEmail(user.email, title, message, linkUrl);
+      }
+    })
+    .catch((err: unknown) => {
+      console.error("[notification] Failed to look up user email:", err);
+    });
+
   return prisma.notification.create({
     data: { userId, title, message, type, linkUrl },
   });

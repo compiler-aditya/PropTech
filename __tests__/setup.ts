@@ -66,6 +66,11 @@ vi.mock("@/lib/prisma", () => ({
   default: mockPrisma,
 }));
 
+// ---- Mock @/lib/email ----
+vi.mock("@/lib/email", () => ({
+  sendNotificationEmail: vi.fn(),
+}));
+
 // ---- Mock @/lib/auth ----
 vi.mock("@/lib/auth", () => ({
   signIn: vi.fn(),
