@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Bell, LogOut, User, Building2 } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +22,7 @@ interface HeaderProps {
   userRole: string;
   userEmail: string;
   unreadCount?: number;
+  avatarUrl?: string | null;
 }
 
 export function Header({
@@ -29,6 +30,7 @@ export function Header({
   userRole,
   userEmail,
   unreadCount = 0,
+  avatarUrl,
 }: HeaderProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -63,6 +65,7 @@ export function Header({
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9">
+                {avatarUrl && <AvatarImage src={avatarUrl} alt={userName} />}
                 <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
                   {initials}
                 </AvatarFallback>

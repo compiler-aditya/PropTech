@@ -8,6 +8,7 @@ interface AppShellProps {
   userRole: string;
   userEmail: string;
   unreadCount?: number;
+  avatarUrl?: string | null;
 }
 
 export function AppShell({
@@ -16,6 +17,7 @@ export function AppShell({
   userRole,
   userEmail,
   unreadCount = 0,
+  avatarUrl,
 }: AppShellProps) {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -26,6 +28,7 @@ export function AppShell({
           userRole={userRole}
           userEmail={userEmail}
           unreadCount={unreadCount}
+          avatarUrl={avatarUrl}
         />
         <main className="flex-1 pb-20 md:pb-0">{children}</main>
       </div>
