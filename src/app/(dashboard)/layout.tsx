@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { AppShell } from "@/components/layout/app-shell";
 import { getUnreadCount } from "@/actions/notifications";
+import { getUserAvatarUrl } from "@/actions/profile";
 
 export default async function DashboardLayout({
   children,
@@ -8,7 +9,10 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const user = await requireAuth();
-  const unreadCount = await getUnreadCount();
+  const [unreadCount, avatarUrl] = await Promise.all([
+    getUnreadCount(),
+    getUserAvatarUrl(user.id),
+  ]);
 
   return (
     <AppShell
@@ -16,6 +20,7 @@ export default async function DashboardLayout({
       userRole={user.role}
       userEmail={user.email || ""}
       unreadCount={unreadCount}
+      avatarUrl={avatarUrl}
     >
       {children}
     </AppShell>
