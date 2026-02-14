@@ -35,6 +35,10 @@ yarn-error.log*
 .env.local
 .env.production.local
 
+# challenge docs (local only)
+demo.md
+PropTech-Demo-Explanation.md
+
 # vercel
 .vercel
 
