@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-utils";
+import { unstable_cache, revalidateTag } from "next/cache";
 import { z } from "zod";
 
 const propertySchema = z.object({
@@ -18,12 +19,16 @@ export async function getProperties() {
   });
 }
 
-export async function getAllProperties() {
-  return prisma.property.findMany({
-    orderBy: { name: "asc" },
-    select: { id: true, name: true, address: true },
-  });
-}
+export const getAllProperties = unstable_cache(
+  async () => {
+    return prisma.property.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, address: true },
+    });
+  },
+  ["all-properties"],
+  { revalidate: 300, tags: ["properties"] }
+);
 
 export async function createProperty(formData: FormData) {
   const user = await requireRole(["MANAGER"]);
@@ -45,5 +50,6 @@ export async function createProperty(formData: FormData) {
     },
   });
 
+  revalidateTag("properties", { expire: 0 });
   return { success: true };
 }

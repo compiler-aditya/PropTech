@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth-utils";
 import { getDashboardStats } from "@/actions/tickets";
@@ -15,8 +16,52 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-export default async function DashboardPage() {
-  const user = await requireAuth();
+function DashboardSkeleton() {
+  return (
+    <>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gray-100">
+                  <div className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="h-7 w-10 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-3 w-16 bg-gray-100 rounded animate-pulse mt-1" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-base">Recent Tickets</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-3 rounded-lg">
+                <div className="min-w-0 flex-1">
+                  <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-3 w-32 bg-gray-100 rounded animate-pulse mt-1" />
+                </div>
+                <div className="flex items-center gap-2 ml-2">
+                  <div className="h-5 w-16 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-5 w-20 bg-gray-100 rounded animate-pulse" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </>
+  );
+}
+
+async function DashboardContent({ userRole }: { userRole: string }) {
   const stats = await getDashboardStats();
 
   const statCards = [
@@ -51,25 +96,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground text-sm">
-            Welcome back, {user.name} · {ROLE_LABELS[user.role]}
-          </p>
-        </div>
-        {user.role === ROLES.TENANT && (
-          <Link href="/tickets/new">
-            <Button>
-              <Plus className="h-4 w-4 mr-1" />
-              New Request
-            </Button>
-          </Link>
-        )}
-      </div>
-
-      {/* Stats */}
+    <>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {statCards.map((stat) => (
           <Link key={stat.label} href={`/tickets?status=${stat.status}`}>
@@ -90,7 +117,6 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Recent Tickets */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Recent Tickets</CardTitle>
@@ -128,12 +154,41 @@ export default async function DashboardPage() {
           ) : (
             <p className="text-sm text-muted-foreground text-center py-6">
               No tickets yet.
-              {user.role === ROLES.TENANT &&
+              {userRole === ROLES.TENANT &&
                 " Submit your first maintenance request to get started."}
             </p>
           )}
         </CardContent>
       </Card>
+    </>
+  );
+}
+
+export default async function DashboardPage() {
+  const user = await requireAuth();
+
+  return (
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground text-sm">
+            Welcome back, {user.name} · {ROLE_LABELS[user.role]}
+          </p>
+        </div>
+        {user.role === ROLES.TENANT && (
+          <Link href="/tickets/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-1" />
+              New Request
+            </Button>
+          </Link>
+        )}
+      </div>
+
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardContent userRole={user.role} />
+      </Suspense>
     </div>
   );
 }
