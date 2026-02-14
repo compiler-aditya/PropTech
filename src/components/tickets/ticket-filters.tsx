@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { CalendarDays, X } from "lucide-react";
 
 export function TicketFilters() {
   const router = useRouter();
@@ -81,21 +81,27 @@ export function TicketFilters() {
         </Select>
       </div>
       <div className="flex items-center gap-1.5">
-        <Input
-          type="date"
-          value={searchParams.get("dateFrom") || ""}
-          onChange={(e) => updateFilter("dateFrom", e.target.value)}
-          className="min-w-0 flex-1 sm:flex-none sm:w-[145px] text-sm"
-          placeholder="From"
-        />
+        <div className="relative min-w-0 flex-1 sm:flex-none sm:w-[145px]">
+          <CalendarDays className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            type="date"
+            value={searchParams.get("dateFrom") || ""}
+            onChange={(e) => updateFilter("dateFrom", e.target.value)}
+            className="pl-8 text-sm"
+            placeholder="From"
+          />
+        </div>
         <span className="text-xs text-muted-foreground shrink-0">to</span>
-        <Input
-          type="date"
-          value={searchParams.get("dateTo") || ""}
-          onChange={(e) => updateFilter("dateTo", e.target.value)}
-          className="min-w-0 flex-1 sm:flex-none sm:w-[145px] text-sm"
-          placeholder="To"
-        />
+        <div className="relative min-w-0 flex-1 sm:flex-none sm:w-[145px]">
+          <CalendarDays className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            type="date"
+            value={searchParams.get("dateTo") || ""}
+            onChange={(e) => updateFilter("dateTo", e.target.value)}
+            className="pl-8 text-sm"
+            placeholder="To"
+          />
+        </div>
       </div>
       {hasFilters && (
         <Button variant="ghost" size="icon" onClick={clearFilters}>
