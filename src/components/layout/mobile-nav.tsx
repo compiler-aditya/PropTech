@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Ticket,
+  Building2,
   Bell,
   User,
 } from "lucide-react";
@@ -20,6 +21,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
   { href: "/tickets", label: "Tickets", icon: Ticket },
+  { href: "/properties", label: "Properties", icon: Building2, roles: ["MANAGER"] },
   { href: "/notifications", label: "Alerts", icon: Bell },
   { href: "/profile", label: "Profile", icon: User },
 ];
