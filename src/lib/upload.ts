@@ -1,10 +1,6 @@
-import { writeFile, unlink, mkdir } from "fs/promises";
-import { existsSync } from "fs";
-import path from "path";
+import { put, del } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
 import { UPLOAD } from "./constants";
-
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 // Map MIME types to safe extensions (never trust user-provided extensions)
 const MIME_TO_EXT: Record<string, string> = {
@@ -40,12 +36,6 @@ function validateMagicBytes(buffer: Buffer, mimeType: string): boolean {
   return true;
 }
 
-async function ensureUploadDir() {
-  if (!existsSync(UPLOAD_DIR)) {
-    await mkdir(UPLOAD_DIR, { recursive: true });
-  }
-}
-
 export async function saveFile(file: File): Promise<{
   filename: string;
   storedName: string;
@@ -67,27 +57,26 @@ export async function saveFile(file: File): Promise<{
     throw new Error("File content does not match its type. Upload rejected.");
   }
 
-  await ensureUploadDir();
-
   // Derive extension from validated MIME type, never from user-provided filename
   const ext = MIME_TO_EXT[file.type] || "bin";
   const storedName = `${uuidv4()}.${ext}`;
-  const filePath = path.join(UPLOAD_DIR, storedName);
 
-  await writeFile(filePath, buffer);
+  const blob = await put(`uploads/${storedName}`, buffer, {
+    access: "public",
+    contentType: file.type,
+  });
 
   return {
     filename: file.name,
-    storedName,
+    storedName: blob.url,
     mimeType: file.type,
     size: file.size,
   };
 }
 
 export async function deleteFile(storedName: string): Promise<void> {
-  const filePath = path.join(UPLOAD_DIR, storedName);
   try {
-    await unlink(filePath);
+    await del(storedName);
   } catch {
     // File may not exist, ignore
   }

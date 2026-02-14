@@ -122,14 +122,14 @@ export default async function TicketDetailPage({
                   {ticket.attachments.map((att) => (
                     <a
                       key={att.id}
-                      href={`/uploads/${att.storedName}`}
+                      href={att.storedName}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block rounded-lg overflow-hidden border hover:border-primary transition-colors"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`/uploads/${att.storedName}`}
+                        src={att.storedName}
                         alt={att.filename}
                         className="w-full h-24 object-cover"
                       />
