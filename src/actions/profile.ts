@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { requireAuth } from "@/lib/auth-utils";
 import { saveFile, deleteFile } from "@/lib/upload";
 import prisma from "@/lib/prisma";
@@ -31,6 +31,7 @@ export async function updateAvatar(formData: FormData) {
       data: { avatarUrl: `/uploads/${saved.storedName}` },
     });
 
+    revalidateTag(`avatar-${user.id}`, { expire: 0 });
     revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
@@ -57,6 +58,7 @@ export async function removeAvatar(): Promise<{ success?: boolean; error?: strin
       data: { avatarUrl: null },
     });
 
+    revalidateTag(`avatar-${user.id}`, { expire: 0 });
     revalidatePath("/", "layout");
     return { success: true };
   } catch {
@@ -65,9 +67,16 @@ export async function removeAvatar(): Promise<{ success?: boolean; error?: strin
 }
 
 export async function getUserAvatarUrl(userId: string): Promise<string | null> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { avatarUrl: true },
-  });
-  return user?.avatarUrl ?? null;
+  const cachedFn = unstable_cache(
+    async () => {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { avatarUrl: true },
+      });
+      return user?.avatarUrl ?? null;
+    },
+    [`avatar-${userId}`],
+    { revalidate: 600, tags: [`avatar-${userId}`] }
+  );
+  return cachedFn();
 }

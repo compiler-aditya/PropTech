@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
+import { unstable_cache, revalidateTag } from "next/cache";
 import { NOTIFICATION_TYPE } from "@/lib/constants";
 import { sendNotificationEmail } from "@/lib/email";
 
@@ -32,9 +33,12 @@ export async function createNotification(
       console.error("[notification] Failed to look up user email:", err);
     });
 
-  return prisma.notification.create({
+  const notification = await prisma.notification.create({
     data: { userId, title, message, type, linkUrl },
   });
+
+  revalidateTag(`unread-${userId}`, { expire: 0 });
+  return notification;
 }
 
 export async function getNotifications() {
@@ -48,9 +52,16 @@ export async function getNotifications() {
 
 export async function getUnreadCount() {
   const user = await requireAuth();
-  return prisma.notification.count({
-    where: { userId: user.id, isRead: false },
-  });
+  const cachedCount = unstable_cache(
+    async () => {
+      return prisma.notification.count({
+        where: { userId: user.id, isRead: false },
+      });
+    },
+    [`unread-count-${user.id}`],
+    { revalidate: 15, tags: [`unread-${user.id}`] }
+  );
+  return cachedCount();
 }
 
 export async function markAsRead(notificationId: string) {
@@ -59,6 +70,7 @@ export async function markAsRead(notificationId: string) {
     where: { id: notificationId, userId: user.id },
     data: { isRead: true },
   });
+  revalidateTag(`unread-${user.id}`, { expire: 0 });
   return { success: true };
 }
 
@@ -68,5 +80,6 @@ export async function markAllAsRead() {
     where: { userId: user.id, isRead: false },
     data: { isRead: true },
   });
+  revalidateTag(`unread-${user.id}`, { expire: 0 });
   return { success: true };
 }
