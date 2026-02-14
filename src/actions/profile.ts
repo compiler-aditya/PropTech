@@ -22,13 +22,12 @@ export async function updateAvatar(formData: FormData) {
       select: { avatarUrl: true },
     });
     if (existing?.avatarUrl) {
-      const oldName = existing.avatarUrl.replace("/uploads/", "");
-      await deleteFile(oldName);
+      await deleteFile(existing.avatarUrl);
     }
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { avatarUrl: `/uploads/${saved.storedName}` },
+      data: { avatarUrl: saved.storedName },
     });
 
     revalidateTag(`avatar-${user.id}`, { expire: 0 });
@@ -49,8 +48,7 @@ export async function removeAvatar(): Promise<{ success?: boolean; error?: strin
     });
 
     if (existing?.avatarUrl) {
-      const oldName = existing.avatarUrl.replace("/uploads/", "");
-      await deleteFile(oldName);
+      await deleteFile(existing.avatarUrl);
     }
 
     await prisma.user.update({
