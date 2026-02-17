@@ -11,21 +11,21 @@ const demoAccounts = [
     email: "sarah@demo.com",
     icon: Home,
     description: "Submit & track requests",
-    color: "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200",
+    color: "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:hover:bg-blue-900 dark:text-blue-300 dark:border-blue-800",
   },
   {
     label: "Manager",
     email: "admin@demo.com",
     icon: Shield,
     description: "Assign & manage tickets",
-    color: "bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200",
+    color: "bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:hover:bg-purple-900 dark:text-purple-300 dark:border-purple-800",
   },
   {
     label: "Technician",
     email: "john@demo.com",
     icon: Wrench,
     description: "View & resolve tasks",
-    color: "bg-green-50 hover:bg-green-100 text-green-700 border-green-200",
+    color: "bg-green-50 hover:bg-green-100 text-green-700 border-green-200 dark:bg-green-950 dark:hover:bg-green-900 dark:text-green-300 dark:border-green-800",
   },
 ];
 

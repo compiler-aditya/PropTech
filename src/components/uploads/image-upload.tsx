@@ -61,7 +61,7 @@ export function ImageUpload({ ticketId }: { ticketId: string }) {
         className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
         onClick={() => fileInputRef.current?.click()}
       >
-        <ImageIcon className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+        <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
         <p className="text-sm text-muted-foreground">
           Click to upload images
         </p>

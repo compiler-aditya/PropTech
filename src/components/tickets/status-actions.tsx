@@ -18,7 +18,7 @@ const statusButtonStyles: Record<string, string> = {
   IN_PROGRESS: "bg-orange-600 hover:bg-orange-700 text-white",
   COMPLETED: "bg-green-600 hover:bg-green-700 text-white",
   ASSIGNED: "bg-blue-600 hover:bg-blue-700 text-white",
-  OPEN: "bg-gray-600 hover:bg-gray-700 text-white",
+  OPEN: "bg-gray-600 hover:bg-gray-700 text-white dark:bg-gray-500 dark:hover:bg-gray-400",
 };
 
 export function StatusActions({

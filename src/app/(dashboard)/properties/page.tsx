@@ -74,7 +74,7 @@ export default function PropertiesPage() {
             </DialogHeader>
             <form action={formAction} className="space-y-4 mt-2">
               {state?.error && (
-                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md border border-red-200">
+                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md border border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800">
                   {state.error}
                 </div>
               )}
@@ -109,8 +109,8 @@ export default function PropertiesPage() {
           {[1, 2, 3].map((i) => (
             <Card key={i} className="animate-pulse">
               <CardContent className="p-6">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                <div className="h-3 bg-gray-200 rounded w-full" />
+                <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+                <div className="h-3 bg-muted rounded w-full" />
               </CardContent>
             </Card>
           ))}
@@ -143,8 +143,8 @@ export default function PropertiesPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <Building2 className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-          <h3 className="font-medium text-gray-900">No properties yet</h3>
+          <Building2 className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
+          <h3 className="font-medium text-foreground">No properties yet</h3>
           <p className="text-sm text-muted-foreground mt-1">
             Add your first property to get started.
           </p>

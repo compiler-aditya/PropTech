@@ -24,12 +24,12 @@ function DashboardSkeleton() {
           <Card key={i}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gray-100">
+                <div className="p-2 rounded-lg bg-muted">
                   <div className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="h-7 w-10 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-3 w-16 bg-gray-100 rounded animate-pulse mt-1" />
+                  <div className="h-7 w-10 bg-muted rounded animate-pulse" />
+                  <div className="h-3 w-16 bg-muted rounded animate-pulse mt-1" />
                 </div>
               </div>
             </CardContent>
@@ -45,12 +45,12 @@ function DashboardSkeleton() {
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex items-center justify-between p-3 rounded-lg">
                 <div className="min-w-0 flex-1">
-                  <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-3 w-32 bg-gray-100 rounded animate-pulse mt-1" />
+                  <div className="h-4 w-48 bg-muted rounded animate-pulse" />
+                  <div className="h-3 w-32 bg-muted rounded animate-pulse mt-1" />
                 </div>
                 <div className="flex items-center gap-2 ml-2">
-                  <div className="h-5 w-16 bg-gray-100 rounded animate-pulse" />
-                  <div className="h-5 w-20 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-5 w-16 bg-muted rounded animate-pulse" />
+                  <div className="h-5 w-20 bg-muted rounded animate-pulse" />
                 </div>
               </div>
             ))}
@@ -69,28 +69,28 @@ async function DashboardContent({ userRole }: { userRole: string }) {
       label: "Open",
       value: stats.open,
       icon: AlertCircle,
-      color: "text-yellow-600 bg-yellow-50",
+      color: "text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-950",
       status: "OPEN",
     },
     {
       label: "Assigned",
       value: stats.assigned,
       icon: UserCheck,
-      color: "text-blue-600 bg-blue-50",
+      color: "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950",
       status: "ASSIGNED",
     },
     {
       label: "In Progress",
       value: stats.inProgress,
       icon: Play,
-      color: "text-orange-600 bg-orange-50",
+      color: "text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-950",
       status: "IN_PROGRESS",
     },
     {
       label: "Completed",
       value: stats.completed,
       icon: CheckCircle2,
-      color: "text-green-600 bg-green-50",
+      color: "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950",
       status: "COMPLETED",
     },
   ];
@@ -133,7 +133,7 @@ async function DashboardContent({ userRole }: { userRole: string }) {
                 <Link
                   key={ticket.id}
                   href={`/tickets/${ticket.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-sm truncate">

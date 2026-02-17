@@ -57,8 +57,8 @@ export default async function TicketsPage({
         </div>
       ) : (
         <div className="text-center py-12">
-          <Ticket className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-          <h3 className="font-medium text-gray-900">No tickets found</h3>
+          <Ticket className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
+          <h3 className="font-medium text-foreground">No tickets found</h3>
           <p className="text-sm text-muted-foreground mt-1">
             {user.role === ROLES.TENANT
               ? "You haven't submitted any maintenance requests yet."

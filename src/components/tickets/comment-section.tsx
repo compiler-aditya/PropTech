@@ -40,7 +40,7 @@ export function CommentSection({
       {comments.length > 0 ? (
         <div className="space-y-3">
           {comments.map((comment) => (
-            <div key={comment.id} className="bg-gray-50 rounded-lg p-3">
+            <div key={comment.id} className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <span className="font-medium text-sm">{comment.author.name}</span>
                 <Badge variant="outline" className="text-xs py-0">
@@ -50,7 +50,7 @@ export function CommentSection({
                   {timeAgo(comment.createdAt)}
                 </span>
               </div>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+              <p className="text-sm text-foreground/80 whitespace-pre-wrap">
                 {comment.content}
               </p>
             </div>

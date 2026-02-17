@@ -111,7 +111,7 @@ export function TicketForm({ properties }: TicketFormProps) {
   return (
     <form action={handleSubmit} className="space-y-4">
       {error && (
-        <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md border border-red-200">
+        <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md border border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800">
           {error}
         </div>
       )}
@@ -204,7 +204,7 @@ export function TicketForm({ properties }: TicketFormProps) {
           className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
           onClick={() => fileInputRef.current?.click()}
         >
-          <ImageIcon className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+          <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
           <p className="text-sm text-muted-foreground">
             Click to add images of the issue
           </p>

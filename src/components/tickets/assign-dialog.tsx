@@ -66,7 +66,7 @@ export function AssignDialog({
               key={tech.id}
               onClick={() => handleAssign(tech.id)}
               disabled={isPending || tech.id === currentAssigneeId}
-              className="w-full flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 transition-colors disabled:opacity-50 text-left"
+              className="w-full flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors disabled:opacity-50 text-left"
             >
               <div>
                 <p className="font-medium text-sm">{tech.name}</p>

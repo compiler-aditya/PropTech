@@ -107,8 +107,8 @@ export function NotificationList({
         </div>
       ) : (
         <div className="text-center py-12">
-          <Bell className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-          <h3 className="font-medium text-gray-900">No notifications</h3>
+          <Bell className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
+          <h3 className="font-medium text-foreground">No notifications</h3>
           <p className="text-sm text-muted-foreground mt-1">
             You&apos;re all caught up!
           </p>

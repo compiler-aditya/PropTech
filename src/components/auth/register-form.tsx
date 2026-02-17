@@ -24,7 +24,7 @@ export function RegisterForm() {
   return (
     <form action={formAction} className="space-y-4">
       {state?.error && (
-        <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md border border-red-200">
+        <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md border border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800">
           {state.error}
         </div>
       )}

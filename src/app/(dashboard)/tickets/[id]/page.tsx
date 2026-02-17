@@ -103,7 +103,7 @@ export default async function TicketDetailPage({
               <CardTitle className="text-base">Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm whitespace-pre-wrap text-gray-700">
+              <p className="text-sm whitespace-pre-wrap text-muted-foreground">
                 {ticket.description}
               </p>
             </CardContent>
