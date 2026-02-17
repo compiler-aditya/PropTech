@@ -57,37 +57,43 @@ export default async function PropertyDetailPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
         <Card>
-          <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-3 text-center sm:text-left">
-            <div className="p-1.5 sm:p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-              <Ticket className="h-4 w-4 sm:h-5 sm:w-5" />
-            </div>
-            <div>
-              <p className="text-xl sm:text-2xl font-bold">{totalTickets}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">Total</p>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                <Ticket className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{totalTickets}</p>
+                <p className="text-xs text-muted-foreground">Total</p>
+              </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-3 text-center sm:text-left">
-            <div className="p-1.5 sm:p-2 rounded-lg bg-yellow-50 text-yellow-600 dark:bg-yellow-950 dark:text-yellow-400">
-              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-            </div>
-            <div>
-              <p className="text-xl sm:text-2xl font-bold">{openTickets}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">Open</p>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-yellow-50 text-yellow-600 dark:bg-yellow-950 dark:text-yellow-400">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{openTickets}</p>
+                <p className="text-xs text-muted-foreground">Open</p>
+              </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-3 text-center sm:text-left">
-            <div className="p-1.5 sm:p-2 rounded-lg bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400">
-              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
-            </div>
-            <div>
-              <p className="text-xl sm:text-2xl font-bold">{completedTickets}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">Completed</p>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{completedTickets}</p>
+                <p className="text-xs text-muted-foreground">Completed</p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -117,7 +123,7 @@ export default async function PropertyDetailPage({
             Tickets ({totalTickets})
           </h2>
           {property.tickets.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {property.tickets.map((ticket) => (
                 <TicketCard key={ticket.id} ticket={ticket} />
               ))}
