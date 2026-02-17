@@ -57,37 +57,55 @@ export default async function PropertyDetailPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
         <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-              <Ticket className="h-5 w-5" />
+          <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-3 text-center sm:text-left">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+              <Ticket className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{totalTickets}</p>
-              <p className="text-xs text-muted-foreground">Total</p>
+              <p className="text-xl sm:text-2xl font-bold">{totalTickets}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Total</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-yellow-50 text-yellow-600 dark:bg-yellow-950 dark:text-yellow-400">
-              <AlertCircle className="h-5 w-5" />
+          <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-3 text-center sm:text-left">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-yellow-50 text-yellow-600 dark:bg-yellow-950 dark:text-yellow-400">
+              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{openTickets}</p>
-              <p className="text-xs text-muted-foreground">Open</p>
+              <p className="text-xl sm:text-2xl font-bold">{openTickets}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Open</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400">
-              <CheckCircle2 className="h-5 w-5" />
+          <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-3 text-center sm:text-left">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400">
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{completedTickets}</p>
-              <p className="text-xs text-muted-foreground">Completed</p>
+              <p className="text-xl sm:text-2xl font-bold">{completedTickets}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Completed</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Details card — shown above tickets on mobile, in sidebar on desktop */}
+      <div className="lg:hidden mb-6">
+        <Card>
+          <CardContent className="p-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Manager:</span>
+              <span className="font-medium">{property.manager.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Created:</span>
+              <span className="font-medium">{formatDate(property.createdAt)}</span>
             </div>
           </CardContent>
         </Card>
@@ -116,7 +134,8 @@ export default async function PropertyDetailPage({
           )}
         </div>
 
-        <div className="space-y-6">
+        {/* Desktop sidebar */}
+        <div className="hidden lg:block space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Details</CardTitle>
