@@ -5,13 +5,14 @@ import { uploadFiles } from "@/actions/uploads";
 import { Button } from "@/components/ui/button";
 import { formatFileSize } from "@/lib/utils";
 import { validateUploadFile } from "@/lib/upload-validation";
-import { Upload, X, ImageIcon } from "lucide-react";
+import { Upload, X, ImageIcon, Camera } from "lucide-react";
 import { toast } from "sonner";
 
 export function ImageUpload({ ticketId }: { ticketId: string }) {
   const [previews, setPreviews] = useState<{ file: File; url: string }[]>([]);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -57,25 +58,43 @@ export function ImageUpload({ ticketId }: { ticketId: string }) {
 
   return (
     <div className="space-y-3">
-      <div
-        className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
-        <p className="text-sm text-muted-foreground">
-          Click to upload images
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          JPEG, PNG, WebP, GIF up to 5MB
-        </p>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          multiple
-          className="hidden"
-          onChange={handleFileSelect}
-        />
+      <div className="grid grid-cols-2 gap-3">
+        <div
+          className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <ImageIcon className="h-6 w-6 mx-auto text-muted-foreground/50 mb-1.5" />
+          <p className="text-sm text-muted-foreground">Browse files</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Up to 5MB each
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+        </div>
+        <div
+          className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
+          onClick={() => cameraInputRef.current?.click()}
+        >
+          <Camera className="h-6 w-6 mx-auto text-muted-foreground/50 mb-1.5" />
+          <p className="text-sm text-muted-foreground">Take photo</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Use camera
+          </p>
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            capture="environment"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+        </div>
       </div>
 
       {previews.length > 0 && (

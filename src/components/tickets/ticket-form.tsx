@@ -18,7 +18,7 @@ import {
 import { CATEGORY_LABELS, UPLOAD } from "@/lib/constants";
 import { formatFileSize } from "@/lib/utils";
 import { validateUploadFile } from "@/lib/upload-validation";
-import { ImageIcon, X } from "lucide-react";
+import { ImageIcon, X, Camera } from "lucide-react";
 import { toast } from "sonner";
 
 interface TicketFormProps {
@@ -33,6 +33,7 @@ export function TicketForm({ properties }: TicketFormProps) {
     { file: File; url: string }[]
   >([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -200,26 +201,43 @@ export function TicketForm({ properties }: TicketFormProps) {
       {/* Image Upload Section */}
       <div className="space-y-2">
         <Label>Images (optional)</Label>
-        <div
-          className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
-          <p className="text-sm text-muted-foreground">
-            Click to add images of the issue
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            JPEG, PNG, WebP, GIF up to 5MB each (max{" "}
-            {UPLOAD.MAX_FILES_PER_TICKET})
-          </p>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            multiple
-            className="hidden"
-            onChange={handleFileSelect}
-          />
+        <div className="grid grid-cols-2 gap-3">
+          <div
+            className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <ImageIcon className="h-6 w-6 mx-auto text-muted-foreground/50 mb-1.5" />
+            <p className="text-sm text-muted-foreground">Browse files</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Up to 5MB each (max {UPLOAD.MAX_FILES_PER_TICKET})
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              multiple
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+          </div>
+          <div
+            className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
+            onClick={() => cameraInputRef.current?.click()}
+          >
+            <Camera className="h-6 w-6 mx-auto text-muted-foreground/50 mb-1.5" />
+            <p className="text-sm text-muted-foreground">Take photo</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Use camera to capture
+            </p>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              capture="environment"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+          </div>
         </div>
 
         {selectedFiles.length > 0 && (
