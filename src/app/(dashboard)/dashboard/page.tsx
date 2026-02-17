@@ -128,12 +128,12 @@ async function DashboardContent({ userRole }: { userRole: string }) {
         </CardHeader>
         <CardContent>
           {stats.recentTickets.length > 0 ? (
-            <div className="space-y-3">
+            <div className="divide-y divide-border">
               {stats.recentTickets.map((ticket) => (
                 <Link
                   key={ticket.id}
                   href={`/tickets/${ticket.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors first:rounded-t-lg last:rounded-b-lg"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-sm truncate">
