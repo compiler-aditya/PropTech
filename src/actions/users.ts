@@ -32,3 +32,25 @@ export async function getTechnicians() {
   await requireRole(["MANAGER"]);
   return cachedGetTechnicians();
 }
+
+export async function getUsers() {
+  await requireRole(["MANAGER"]);
+
+  return prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      phone: true,
+      createdAt: true,
+      _count: {
+        select: {
+          submittedTickets: true,
+          assignedTickets: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}

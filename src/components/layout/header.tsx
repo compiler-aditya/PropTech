@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, LogOut, User, Building2 } from "lucide-react";
 import Link from "next/link";
 import { ROLE_LABELS } from "@/lib/constants";
+import { ThemeToggle } from "./theme-toggle";
 
 interface HeaderProps {
   userName: string;
@@ -42,7 +43,7 @@ export function Header({
     .slice(0, 2);
 
   return (
-    <header className="h-16 border-b bg-white flex items-center justify-between px-4 md:px-6">
+    <header className="h-16 border-b bg-background flex items-center justify-between px-4 md:px-6">
       <div className="flex items-center gap-2 md:hidden">
         <Building2 className="h-6 w-6 text-primary" />
         <span className="font-bold text-lg">PropTech</span>
@@ -60,6 +61,8 @@ export function Header({
             )}
           </Button>
         </Link>
+
+        <ThemeToggle />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

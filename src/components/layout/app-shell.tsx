@@ -20,7 +20,7 @@ export function AppShell({
   avatarUrl,
 }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Sidebar userRole={userRole} />
       <div className="md:pl-64 flex flex-col min-h-screen">
         <Header

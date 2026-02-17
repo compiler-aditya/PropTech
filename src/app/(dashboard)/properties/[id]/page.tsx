@@ -1,0 +1,151 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { requireRole } from "@/lib/auth-utils";
+import { getPropertyById } from "@/actions/properties";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { TicketCard } from "@/components/tickets/ticket-card";
+import { formatDate } from "@/lib/utils";
+import {
+  ArrowLeft,
+  Building2,
+  User,
+  Calendar,
+  AlertCircle,
+  CheckCircle2,
+  Ticket,
+} from "lucide-react";
+
+export default async function PropertyDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  await requireRole(["MANAGER"]);
+  const { id } = await params;
+  const property = await getPropertyById(id);
+
+  if (!property) notFound();
+
+  const totalTickets = property.tickets.length;
+  const openTickets = property.tickets.filter(
+    (t) => t.status !== "COMPLETED"
+  ).length;
+  const completedTickets = property.tickets.filter(
+    (t) => t.status === "COMPLETED"
+  ).length;
+
+  return (
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      <Link
+        href="/properties"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+      >
+        <ArrowLeft className="h-4 w-4 mr-1" />
+        Back to Properties
+      </Link>
+
+      <div className="mb-6">
+        <div className="flex items-center gap-3">
+          <div className="bg-primary/10 p-2 rounded-lg">
+            <Building2 className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold">{property.name}</h1>
+            <p className="text-sm text-muted-foreground">{property.address}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+              <Ticket className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{totalTickets}</p>
+              <p className="text-xs text-muted-foreground">Total</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-yellow-50 text-yellow-600 dark:bg-yellow-950 dark:text-yellow-400">
+              <AlertCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{openTickets}</p>
+              <p className="text-xs text-muted-foreground">Open</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{completedTickets}</p>
+              <p className="text-xs text-muted-foreground">Completed</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          <h2 className="text-base font-semibold">
+            Tickets ({totalTickets})
+          </h2>
+          {property.tickets.length > 0 ? (
+            <div className="space-y-3">
+              {property.tickets.map((ticket) => (
+                <TicketCard key={ticket.id} ticket={ticket} />
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <Ticket className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  No tickets for this property yet.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="flex items-start gap-2">
+                <User className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                <div>
+                  <p className="text-muted-foreground">Manager</p>
+                  <p className="font-medium">{property.manager.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {property.manager.email}
+                  </p>
+                </div>
+              </div>
+              <Separator />
+              <div className="flex items-start gap-2">
+                <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                <div>
+                  <p className="text-muted-foreground">Created</p>
+                  <p className="font-medium">
+                    {formatDate(property.createdAt)}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}

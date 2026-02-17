@@ -30,6 +30,28 @@ export const getAllProperties = unstable_cache(
   { revalidate: 300, tags: ["properties"] }
 );
 
+export async function getPropertyById(id: string) {
+  await requireRole(["MANAGER"]);
+
+  return prisma.property.findUnique({
+    where: { id },
+    include: {
+      manager: {
+        select: { id: true, name: true, email: true },
+      },
+      tickets: {
+        include: {
+          property: { select: { name: true } },
+          submitter: { select: { name: true } },
+          assignee: { select: { name: true } },
+          _count: { select: { comments: true, attachments: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+}
+
 export async function createProperty(formData: FormData) {
   const user = await requireRole(["MANAGER"]);
   const raw = {

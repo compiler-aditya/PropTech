@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Building2, Plus, Ticket } from "lucide-react";
+import Link from "next/link";
 
 type Property = {
   id: string;
@@ -117,25 +118,27 @@ export default function PropertiesPage() {
       ) : properties.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {properties.map((property) => (
-            <Card key={property.id}>
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="bg-primary/10 p-2 rounded-lg">
-                    <Building2 className="h-5 w-5 text-primary" />
+            <Link key={property.id} href={`/properties/${property.id}`}>
+              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-primary/10 p-2 rounded-lg">
+                      <Building2 className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium truncate">{property.name}</h3>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {property.address}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                        <Ticket className="h-3 w-3" />
+                        {property._count.tickets} ticket{property._count.tickets !== 1 ? "s" : ""}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium truncate">{property.name}</h3>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {property.address}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                      <Ticket className="h-3 w-3" />
-                      {property._count.tickets} ticket{property._count.tickets !== 1 ? "s" : ""}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       ) : (
