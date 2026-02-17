@@ -24,8 +24,8 @@ interface TicketCardProps {
 export function TicketCard({ ticket }: TicketCardProps) {
   return (
     <Link href={`/tickets/${ticket.id}`}>
-      <Card className="hover:shadow-md transition-shadow cursor-pointer py-0">
-        <CardContent className="p-4">
+      <Card className="hover:shadow-md transition-shadow cursor-pointer py-3">
+        <CardContent className="px-4">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-medium text-sm line-clamp-2 sm:line-clamp-1">{ticket.title}</h3>
             <StatusBadge status={ticket.status} />
