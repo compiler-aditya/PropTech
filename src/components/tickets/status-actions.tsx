@@ -21,6 +21,14 @@ const statusButtonStyles: Record<string, string> = {
   OPEN: "bg-gray-600 hover:bg-gray-700 text-white dark:bg-gray-500 dark:hover:bg-gray-400",
 };
 
+// Action-oriented labels (what will happen, not the resulting state name)
+const actionLabels: Record<string, string> = {
+  IN_PROGRESS: "Start Work",
+  COMPLETED: "Mark Complete",
+  ASSIGNED: "Pause",
+  OPEN: "Reopen",
+};
+
 export function StatusActions({
   ticketId,
   currentStatus,
@@ -71,7 +79,7 @@ export function StatusActions({
             disabled={isPending}
           >
             <Icon className="h-4 w-4 mr-1" />
-            {STATUS_LABELS[status]}
+            {actionLabels[status] ?? STATUS_LABELS[status]}
           </Button>
         );
       })}

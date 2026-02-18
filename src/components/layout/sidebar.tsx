@@ -9,6 +9,7 @@ import {
   Building2,
   Bell,
   User,
+  Users,
 } from "lucide-react";
 
 interface NavItem {
@@ -22,6 +23,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/tickets", label: "Tickets", icon: Ticket },
   { href: "/properties", label: "Properties", icon: Building2, roles: ["MANAGER"] },
+  { href: "/users", label: "Users", icon: Users, roles: ["MANAGER"] },
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/profile", label: "Profile", icon: User },
 ];

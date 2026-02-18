@@ -1,5 +1,5 @@
-import { timeAgo } from "@/lib/utils";
-import { ROLE_LABELS } from "@/lib/constants";
+import { timeAgo, formatDateTime } from "@/lib/utils";
+import { ROLE_LABELS, STATUS_LABELS, PRIORITY_LABELS } from "@/lib/constants";
 import {
   CirclePlus,
   ArrowRightLeft,
@@ -34,11 +34,11 @@ function getDescription(action: string, details: string | null, userName: string
     case "CREATED":
       return `${userName} created this ticket`;
     case "STATUS_CHANGED":
-      return `${userName} changed status from ${parsed.from?.replace("_", " ")} to ${parsed.to?.replace("_", " ")}`;
+      return `${userName} changed status from ${STATUS_LABELS[parsed.from] ?? parsed.from} to ${STATUS_LABELS[parsed.to] ?? parsed.to}`;
     case "ASSIGNED":
       return `${userName} assigned to ${parsed.technicianName}`;
     case "PRIORITY_CHANGED":
-      return `${userName} changed priority from ${parsed.from} to ${parsed.to}`;
+      return `${userName} changed priority from ${PRIORITY_LABELS[parsed.from] ?? parsed.from} to ${PRIORITY_LABELS[parsed.to] ?? parsed.to}`;
     case "COMMENTED":
       return `${userName} added a comment`;
     case "ATTACHMENT_ADDED":
@@ -73,7 +73,7 @@ export function ActivityLog({ entries }: { entries: ActivityEntry[] }) {
                 {getDescription(entry.action, entry.details, entry.user.name)}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {timeAgo(entry.createdAt)} · {ROLE_LABELS[entry.user.role]}
+                <span title={formatDateTime(entry.createdAt)}>{timeAgo(entry.createdAt)}</span> · {ROLE_LABELS[entry.user.role]}
               </p>
             </div>
           </div>

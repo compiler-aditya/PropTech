@@ -29,6 +29,7 @@ export function TicketForm({ properties }: TicketFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
+  const [description, setDescription] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<
     { file: File; url: string }[]
   >([]);
@@ -128,13 +129,21 @@ export function TicketForm({ properties }: TicketFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="description">Description</Label>
+          <span className={`text-xs ${description.length > 900 ? "text-red-500" : "text-muted-foreground"}`}>
+            {description.length}/1000
+          </span>
+        </div>
         <Textarea
           id="description"
           name="description"
           placeholder="Provide details about the issue, when it started, and any relevant context..."
           rows={4}
           required
+          maxLength={1000}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
       </div>
 
@@ -168,7 +177,7 @@ export function TicketForm({ properties }: TicketFormProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="category">Category</Label>
-          <Select name="category" defaultValue="OTHER">
+          <Select name="category">
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
