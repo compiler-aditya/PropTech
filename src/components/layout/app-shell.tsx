@@ -32,7 +32,12 @@ export function AppShell({
         />
         <main className="flex-1 pb-20 md:pb-0">{children}</main>
       </div>
-      <MobileNav userRole={userRole} />
+      <MobileNav
+        userRole={userRole}
+        userName={userName}
+        userEmail={userEmail}
+        avatarUrl={avatarUrl}
+      />
     </div>
   );
 }
