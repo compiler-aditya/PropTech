@@ -14,12 +14,15 @@ import {
   UserCheck,
   Play,
   CheckCircle2,
+  Building2,
+  Ticket,
+  ArrowRight,
 } from "lucide-react";
 
 function DashboardSkeleton() {
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}>
             <CardContent className="p-4">
@@ -42,7 +45,7 @@ function DashboardSkeleton() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
+            {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center justify-between p-3 rounded-lg">
                 <div className="min-w-0 flex-1">
                   <div className="h-4 w-48 bg-muted rounded animate-pulse" />
@@ -95,12 +98,15 @@ async function DashboardContent({ userRole }: { userRole: string }) {
     },
   ];
 
+  const totalTickets = stats.open + stats.assigned + stats.inProgress + stats.completed;
+
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map((stat) => (
           <Link key={stat.label} href={`/tickets?status=${stat.status}`}>
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg ${stat.color}`}>
@@ -117,40 +123,106 @@ async function DashboardContent({ userRole }: { userRole: string }) {
         ))}
       </div>
 
+      {/* Recent Tickets */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Recent Tickets</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <div className="flex items-center gap-2">
+            <Ticket className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-base">Recent Tickets</CardTitle>
+            <span className="text-xs text-muted-foreground tabular-nums">({totalTickets})</span>
+          </div>
           <Link href="/tickets">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="text-xs gap-1">
               View All
+              <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           {stats.recentTickets.length > 0 ? (
-            <div className="divide-y divide-border">
-              {stats.recentTickets.map((ticket) => (
-                <Link
-                  key={ticket.id}
-                  href={`/tickets/${ticket.id}`}
-                  className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors first:rounded-t-lg last:rounded-b-lg"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm truncate">
-                      {ticket.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {ticket.property.name} · {ticket.submitter.name}
-                      {ticket.assignee && ` → ${ticket.assignee.name}`}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-2 shrink-0">
-                    <PriorityBadge priority={ticket.priority} />
-                    <StatusBadge status={ticket.status} />
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <>
+              {/* ── Desktop table ─────────────────────────────────── */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-xs text-muted-foreground uppercase tracking-wide">
+                      <th className="text-left py-2.5 pr-4 font-medium">Title</th>
+                      <th className="text-left py-2.5 px-3 font-medium">Property</th>
+                      <th className="text-left py-2.5 px-3 font-medium">Submitter</th>
+                      <th className="text-left py-2.5 px-3 font-medium">Assignee</th>
+                      <th className="text-left py-2.5 px-3 font-medium">Priority</th>
+                      <th className="text-left py-2.5 px-3 font-medium">Status</th>
+                      <th className="text-right py-2.5 pl-3 font-medium">Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stats.recentTickets.map((ticket) => (
+                      <tr
+                        key={ticket.id}
+                        className="border-b last:border-0 hover:bg-muted/40 transition-colors group"
+                      >
+                        <td className="py-3 pr-4">
+                          <Link
+                            href={`/tickets/${ticket.id}`}
+                            className="font-medium text-foreground hover:text-primary transition-colors"
+                          >
+                            {ticket.title}
+                          </Link>
+                        </td>
+                        <td className="py-3 px-3 text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            <Building2 className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate max-w-[160px]">{ticket.property.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-muted-foreground truncate max-w-[140px]">
+                          {ticket.submitter.name}
+                        </td>
+                        <td className="py-3 px-3 text-muted-foreground truncate max-w-[140px]">
+                          {ticket.assignee?.name || (
+                            <span className="text-muted-foreground/50 italic">Unassigned</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-3">
+                          <PriorityBadge priority={ticket.priority} />
+                        </td>
+                        <td className="py-3 px-3">
+                          <StatusBadge status={ticket.status} />
+                        </td>
+                        <td className="py-3 pl-3 text-right text-muted-foreground text-xs whitespace-nowrap">
+                          {timeAgo(ticket.updatedAt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ── Mobile card list ──────────────────────────────── */}
+              <div className="md:hidden divide-y divide-border">
+                {stats.recentTickets.map((ticket) => (
+                  <Link
+                    key={ticket.id}
+                    href={`/tickets/${ticket.id}`}
+                    className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm truncate">
+                        {ticket.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {ticket.property.name} · {ticket.submitter.name}
+                        {ticket.assignee && ` → ${ticket.assignee.name}`}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 ml-2 shrink-0">
+                      <PriorityBadge priority={ticket.priority} />
+                      <StatusBadge status={ticket.status} />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-6">
               No tickets yet.
@@ -168,8 +240,8 @@ export default async function DashboardPage() {
   const user = await requireAuth();
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground text-sm">

@@ -50,7 +50,7 @@ export default async function TicketsPage({
       </Suspense>
 
       {tickets.length > 0 ? (
-        <div className="grid gap-4">
+        <div className="grid gap-4 lg:grid-cols-2">
           {tickets.map((ticket) => (
             <TicketCard key={ticket.id} ticket={ticket} />
           ))}
