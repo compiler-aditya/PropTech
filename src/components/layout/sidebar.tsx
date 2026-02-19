@@ -10,6 +10,7 @@ import {
   Bell,
   User,
   Users,
+  BarChart3,
 } from "lucide-react";
 
 interface NavItem {
@@ -24,6 +25,7 @@ const navItems: NavItem[] = [
   { href: "/tickets", label: "Tickets", icon: Ticket },
   { href: "/properties", label: "Properties", icon: Building2, roles: ["MANAGER"] },
   { href: "/users", label: "Users", icon: Users, roles: ["MANAGER"] },
+  { href: "/analytics", label: "Analytics", icon: BarChart3, roles: ["MANAGER"] },
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/profile", label: "Profile", icon: User },
 ];

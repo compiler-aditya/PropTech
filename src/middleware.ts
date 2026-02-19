@@ -9,6 +9,7 @@ const roleRouteAccess: Record<string, string[]> = {
   "/properties": ["MANAGER"],
   "/users": ["MANAGER"],
   "/properties/new": ["MANAGER"],
+  "/analytics": ["MANAGER"],
 };
 
 const publicPaths = ["/login", "/register"];
