@@ -9,6 +9,7 @@ import {
   Building2,
   Bell,
   User,
+  BarChart3,
 } from "lucide-react";
 
 interface NavItem {
@@ -22,6 +23,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
   { href: "/tickets", label: "Tickets", icon: Ticket },
   { href: "/properties", label: "Properties", icon: Building2, roles: ["MANAGER"] },
+  { href: "/analytics", label: "Analytics", icon: BarChart3, roles: ["MANAGER"] },
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/profile", label: "Profile", icon: User },
 ];
@@ -44,7 +46,7 @@ export function MobileNav({ userRole }: { userRole: string }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors min-w-0",
+                "flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors min-w-0",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
