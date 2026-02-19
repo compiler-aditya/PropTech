@@ -36,62 +36,62 @@ export default async function PropertyDetailPage({
   ).length;
 
   return (
-    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
       <Link
         href="/properties"
-        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4 mr-1" />
         Back to Properties
       </Link>
 
-      <div className="mb-6">
-        <div className="flex items-center gap-3">
-          <div className="bg-primary/10 p-2 rounded-lg">
-            <Building2 className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">{property.name}</h1>
-            <p className="text-sm text-muted-foreground">{property.address}</p>
-          </div>
+      {/* Property header */}
+      <div className="flex items-center gap-3">
+        <div className="bg-primary/10 p-2.5 rounded-lg">
+          <Building2 className="h-6 w-6 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold">{property.name}</h1>
+          <p className="text-sm text-muted-foreground">{property.address}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+      {/* Stat cards */}
+      <div className="grid grid-cols-3 gap-3 md:gap-4">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-                <Ticket className="h-5 w-5" />
+          <CardContent className="p-3 md:p-4">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="p-1.5 md:p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                <Ticket className="h-4 w-4 md:h-5 md:w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{totalTickets}</p>
+                <p className="text-xl md:text-2xl font-bold">{totalTickets}</p>
                 <p className="text-xs text-muted-foreground">Total</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-yellow-50 text-yellow-600 dark:bg-yellow-950 dark:text-yellow-400">
-                <AlertCircle className="h-5 w-5" />
+          <CardContent className="p-3 md:p-4">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="p-1.5 md:p-2 rounded-lg bg-yellow-50 text-yellow-600 dark:bg-yellow-950 dark:text-yellow-400">
+                <AlertCircle className="h-4 w-4 md:h-5 md:w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{openTickets}</p>
+                <p className="text-xl md:text-2xl font-bold">{openTickets}</p>
                 <p className="text-xs text-muted-foreground">Open</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400">
-                <CheckCircle2 className="h-5 w-5" />
+          <CardContent className="p-3 md:p-4">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="p-1.5 md:p-2 rounded-lg bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400">
+                <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{completedTickets}</p>
+                <p className="text-xl md:text-2xl font-bold">{completedTickets}</p>
                 <p className="text-xs text-muted-foreground">Completed</p>
               </div>
             </div>
@@ -100,7 +100,7 @@ export default async function PropertyDetailPage({
       </div>
 
       {/* Details card — shown above tickets on mobile, in sidebar on desktop */}
-      <div className="lg:hidden mb-6">
+      <div className="lg:hidden">
         <Card>
           <CardContent className="p-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
             <div className="flex items-center gap-2">
@@ -118,12 +118,12 @@ export default async function PropertyDetailPage({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-5">
           <h2 className="text-base font-semibold">
             Tickets ({totalTickets})
           </h2>
           {property.tickets.length > 0 ? (
-            <div className="space-y-4">
+            <div className="grid gap-4 xl:grid-cols-2">
               {property.tickets.map((ticket) => (
                 <TicketCard key={ticket.id} ticket={ticket} />
               ))}
