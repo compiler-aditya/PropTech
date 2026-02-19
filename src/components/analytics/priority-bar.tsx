@@ -24,7 +24,7 @@ export function PriorityBar({ data }: { data: PriorityEntry[] }) {
         <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
         <YAxis type="category" dataKey="label" width={64} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
         <Tooltip
-          cursor={{ fill: "hsl(var(--muted))" }}
+          cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
           contentStyle={{
             fontSize: "12px",
             borderRadius: "8px",

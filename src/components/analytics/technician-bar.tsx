@@ -29,7 +29,7 @@ export function TechnicianBar({ data }: { data: TechEntry[] }) {
         <XAxis dataKey="name" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
         <YAxis allowDecimals={false} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} width={28} />
         <Tooltip
-          cursor={{ fill: "hsl(var(--muted))" }}
+          cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
           contentStyle={{
             fontSize: "12px",
             borderRadius: "8px",
