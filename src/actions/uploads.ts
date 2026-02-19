@@ -32,34 +32,51 @@ export async function uploadFiles(ticketId: string, formData: FormData) {
     };
   }
 
-  const results = [];
+  // Phase 1: Save all files to blob storage
+  // If any upload fails, clean up already-uploaded blobs before returning
+  const savedFiles: Awaited<ReturnType<typeof saveFile>>[] = [];
   for (const file of files) {
     try {
       const saved = await saveFile(file);
-      const attachment = await prisma.fileAttachment.create({
-        data: {
-          ...saved,
-          ticketId,
-          uploadedBy: user.id,
-        },
-      });
-      results.push(attachment);
+      savedFiles.push(saved);
     } catch (err) {
+      // Roll back successfully uploaded blobs from this batch
+      await Promise.allSettled(savedFiles.map((f) => deleteFile(f.storedName)));
       return { error: err instanceof Error ? err.message : "Upload failed" };
     }
   }
 
-  await prisma.ticketActivityLog.create({
-    data: {
-      ticketId,
-      performedBy: user.id,
-      action: "ATTACHMENT_ADDED",
-      details: JSON.stringify({ count: results.length }),
-    },
-  });
+  // Phase 2: Create all DB records in a single transaction so they either
+  // all succeed or all fail (no partial attachment state in the database)
+  try {
+    await prisma.$transaction([
+      ...savedFiles.map((saved) =>
+        prisma.fileAttachment.create({
+          data: {
+            ...saved,
+            ticketId,
+            uploadedBy: user.id,
+          },
+        })
+      ),
+      prisma.ticketActivityLog.create({
+        data: {
+          ticketId,
+          performedBy: user.id,
+          action: "ATTACHMENT_ADDED",
+          details: JSON.stringify({ count: savedFiles.length }),
+        },
+      }),
+    ]);
+  } catch (err) {
+    // Transaction failed — clean up all blobs we uploaded in this batch
+    await Promise.allSettled(savedFiles.map((f) => deleteFile(f.storedName)));
+    console.error("uploadFiles: DB transaction failed, blobs cleaned up", err);
+    return { error: "Upload failed. Please try again." };
+  }
 
   revalidatePath(`/tickets/${ticketId}`);
-  return { success: true, count: results.length };
+  return { success: true, count: savedFiles.length };
 }
 
 export async function removeFile(attachmentId: string) {
@@ -79,8 +96,18 @@ export async function removeFile(attachmentId: string) {
   if (!isUploader && !hasTicketAccess) return { error: "Access denied" };
   if (attachment.ticket.status === "COMPLETED") return { error: "Cannot delete files from completed tickets" };
 
-  await deleteFile(attachment.storedName);
+  // Delete DB record first — if this fails we still have the blob (recoverable)
   await prisma.fileAttachment.delete({ where: { id: attachmentId } });
+
+  // Then delete from blob storage — log failures instead of silently ignoring
+  try {
+    await deleteFile(attachment.storedName);
+  } catch (err) {
+    console.error(
+      `removeFile: failed to delete blob ${attachment.storedName} — file may be orphaned in storage`,
+      err
+    );
+  }
 
   revalidatePath(`/tickets/${attachment.ticketId}`);
   return { success: true };

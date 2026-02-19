@@ -29,22 +29,23 @@ export async function addComment(ticketId: string, content: string) {
   // Verify user has access to this ticket
   if (!canAccessTicket(user, ticket)) return { error: "Access denied" };
 
-  await prisma.ticketComment.create({
-    data: {
-      ticketId,
-      authorId: user.id,
-      content: content.trim(),
-    },
-  });
-
-  await prisma.ticketActivityLog.create({
-    data: {
-      ticketId,
-      performedBy: user.id,
-      action: "COMMENTED",
-      details: JSON.stringify({ preview: content.trim().slice(0, 100) }),
-    },
-  });
+  await prisma.$transaction([
+    prisma.ticketComment.create({
+      data: {
+        ticketId,
+        authorId: user.id,
+        content: content.trim(),
+      },
+    }),
+    prisma.ticketActivityLog.create({
+      data: {
+        ticketId,
+        performedBy: user.id,
+        action: "COMMENTED",
+        details: JSON.stringify({ preview: content.trim().slice(0, 100) }),
+      },
+    }),
+  ]);
 
   // Notify other participants
   const notifyIds = new Set<string>();

@@ -6,11 +6,12 @@ import prisma from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { AuthError } from "next-auth";
+import { headers } from "next/headers";
 
 export async function loginAction(formData: FormData) {
   const email = (formData.get("email") as string).toLowerCase().trim();
 
-  const rl = rateLimit(`login:${email}`, { maxAttempts: 5, windowMs: 15 * 60 * 1000 });
+  const rl = await rateLimit(`login:${email}`, { maxAttempts: 5, windowMs: 15 * 60 * 1000 });
   if (!rl.success) {
     return { error: "Too many login attempts. Please try again in 15 minutes." };
   }
@@ -30,8 +31,12 @@ export async function loginAction(formData: FormData) {
 }
 
 export async function registerAction(formData: FormData) {
-  const ip = "register"; // In production, extract from headers
-  const rl = rateLimit(`register:${ip}`, { maxAttempts: 3, windowMs: 60 * 60 * 1000 });
+  const headersList = await headers();
+  const ip =
+    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headersList.get("x-real-ip") ||
+    "unknown";
+  const rl = await rateLimit(`register:${ip}`, { maxAttempts: 3, windowMs: 60 * 60 * 1000 });
   if (!rl.success) {
     return { error: "Too many registration attempts. Please try again later." };
   }

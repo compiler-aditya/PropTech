@@ -12,7 +12,7 @@ import { revalidatePath } from "next/cache";
 export async function createTicket(formData: FormData) {
   const user = await requireRole(["TENANT"]);
 
-  const rl = rateLimit(`ticket:${user.id}`, { maxAttempts: 10, windowMs: 60 * 60 * 1000 });
+  const rl = await rateLimit(`ticket:${user.id}`, { maxAttempts: 10, windowMs: 60 * 60 * 1000 });
   if (!rl.success) return { error: "Too many tickets. Please try again later." };
 
   const raw = {
@@ -29,20 +29,22 @@ export async function createTicket(formData: FormData) {
     return { error: parsed.error.issues[0].message };
   }
 
-  const ticket = await prisma.maintenanceTicket.create({
-    data: {
-      ...parsed.data,
-      submitterId: user.id,
-    },
-  });
-
-  await prisma.ticketActivityLog.create({
-    data: {
-      ticketId: ticket.id,
-      performedBy: user.id,
-      action: "CREATED",
-      details: JSON.stringify({ title: ticket.title }),
-    },
+  const ticket = await prisma.$transaction(async (tx) => {
+    const t = await tx.maintenanceTicket.create({
+      data: {
+        ...parsed.data,
+        submitterId: user.id,
+      },
+    });
+    await tx.ticketActivityLog.create({
+      data: {
+        ticketId: t.id,
+        performedBy: user.id,
+        action: "CREATED",
+        details: JSON.stringify({ title: t.title }),
+      },
+    });
+    return t;
   });
 
   // Notify managers
@@ -192,23 +194,24 @@ export async function assignTicket(ticketId: string, technicianId: string) {
 
   const oldAssigneeId = ticket.assigneeId;
 
-  await prisma.maintenanceTicket.update({
-    where: { id: ticketId },
-    data: { assigneeId: technicianId, status: "ASSIGNED" },
-  });
-
-  await prisma.ticketActivityLog.create({
-    data: {
-      ticketId,
-      performedBy: user.id,
-      action: "ASSIGNED",
-      details: JSON.stringify({
-        technicianName: technician.name,
-        technicianId,
-        previousAssigneeId: oldAssigneeId ?? null,
-      }),
-    },
-  });
+  await prisma.$transaction([
+    prisma.maintenanceTicket.update({
+      where: { id: ticketId },
+      data: { assigneeId: technicianId, status: "ASSIGNED" },
+    }),
+    prisma.ticketActivityLog.create({
+      data: {
+        ticketId,
+        performedBy: user.id,
+        action: "ASSIGNED",
+        details: JSON.stringify({
+          technicianName: technician.name,
+          technicianId,
+          previousAssigneeId: oldAssigneeId ?? null,
+        }),
+      },
+    }),
+  ]);
 
   // Notify old assignee about reassignment
   if (oldAssigneeId && oldAssigneeId !== technicianId) {
@@ -284,22 +287,23 @@ export async function updateTicketStatus(ticketId: string, newStatus: string) {
     updateData.assigneeId = null;
   }
 
-  await prisma.maintenanceTicket.update({
-    where: { id: ticketId },
-    data: updateData,
-  });
-
-  await prisma.ticketActivityLog.create({
-    data: {
-      ticketId,
-      performedBy: user.id,
-      action: "STATUS_CHANGED",
-      details: JSON.stringify({
-        from: ticket.status,
-        to: newStatus,
-      }),
-    },
-  });
+  await prisma.$transaction([
+    prisma.maintenanceTicket.update({
+      where: { id: ticketId },
+      data: updateData,
+    }),
+    prisma.ticketActivityLog.create({
+      data: {
+        ticketId,
+        performedBy: user.id,
+        action: "STATUS_CHANGED",
+        details: JSON.stringify({
+          from: ticket.status,
+          to: newStatus,
+        }),
+      },
+    }),
+  ]);
 
   // Notify submitter
   if (ticket.submitter.id !== user.id) {
@@ -338,22 +342,23 @@ export async function updateTicketPriority(
     return { error: "Cannot change priority on completed tickets" };
   }
 
-  await prisma.maintenanceTicket.update({
-    where: { id: ticketId },
-    data: { priority: newPriority },
-  });
-
-  await prisma.ticketActivityLog.create({
-    data: {
-      ticketId,
-      performedBy: user.id,
-      action: "PRIORITY_CHANGED",
-      details: JSON.stringify({
-        from: ticket.priority,
-        to: newPriority,
-      }),
-    },
-  });
+  await prisma.$transaction([
+    prisma.maintenanceTicket.update({
+      where: { id: ticketId },
+      data: { priority: newPriority },
+    }),
+    prisma.ticketActivityLog.create({
+      data: {
+        ticketId,
+        performedBy: user.id,
+        action: "PRIORITY_CHANGED",
+        details: JSON.stringify({
+          from: ticket.priority,
+          to: newPriority,
+        }),
+      },
+    }),
+  ]);
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");
