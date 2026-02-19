@@ -7,34 +7,50 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  CartesianGrid,
+  Cell,
 } from "recharts";
 
 type CategoryEntry = { category: string; label: string; count: number };
 
+const COLORS = [
+  "#60a5fa", "#818cf8", "#a78bfa", "#f472b6",
+  "#34d399", "#fb923c", "#facc15",
+];
+
 export function CategoryBar({ data }: { data: CategoryEntry[] }) {
   if (data.length === 0) {
     return (
-      <div className="h-[260px] flex items-center justify-center text-sm text-muted-foreground">
+      <div className="h-[220px] flex items-center justify-center text-sm text-muted-foreground">
         No data
       </div>
     );
   }
 
+  const height = Math.max(200, data.length * 36 + 16);
+
   return (
-    <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={data} margin={{ top: 4, right: 8, bottom: 40, left: 0 }} barSize={28}>
-        <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="3 3" />
+    <ResponsiveContainer width="100%" height={height}>
+      <BarChart
+        data={data}
+        layout="vertical"
+        margin={{ top: 4, right: 32, bottom: 4, left: 4 }}
+        barSize={20}
+      >
         <XAxis
-          dataKey="label"
+          type="number"
+          allowDecimals={false}
           tick={{ fontSize: 11 }}
           tickLine={false}
           axisLine={false}
-          angle={-35}
-          textAnchor="end"
-          interval={0}
         />
-        <YAxis allowDecimals={false} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} width={28} />
+        <YAxis
+          type="category"
+          dataKey="label"
+          width={90}
+          tick={{ fontSize: 11 }}
+          tickLine={false}
+          axisLine={false}
+        />
         <Tooltip
           cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
           contentStyle={{
@@ -46,7 +62,11 @@ export function CategoryBar({ data }: { data: CategoryEntry[] }) {
           }}
           formatter={(value: number) => [value, "Tickets"]}
         />
-        <Bar dataKey="count" fill="#60a5fa" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+          {data.map((entry, i) => (
+            <Cell key={entry.category} fill={COLORS[i % COLORS.length]} />
+          ))}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );

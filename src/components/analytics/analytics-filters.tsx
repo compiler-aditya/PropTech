@@ -50,62 +50,65 @@ export function AnalyticsFilters({ properties, technicians }: AnalyticsFiltersPr
   };
 
   return (
-    <div className="flex flex-wrap gap-2 items-center">
-      {/* Property filter */}
-      <Select
-        value={propertyId || "all"}
-        onValueChange={(v) => updateParam("propertyId", v === "all" ? "" : v)}
-      >
-        <SelectTrigger className="h-9 w-[180px] text-sm">
-          <SelectValue placeholder="All Properties" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Properties</SelectItem>
-          {properties.map((p) => (
-            <SelectItem key={p.id} value={p.id}>
-              {p.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div className="space-y-2">
+      {/* 2-col grid on mobile, flex row on desktop */}
+      <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center">
+        {/* Property filter */}
+        <Select
+          value={propertyId || "all"}
+          onValueChange={(v) => updateParam("propertyId", v === "all" ? "" : v)}
+        >
+          <SelectTrigger className="h-9 w-full md:w-[180px] text-sm">
+            <SelectValue placeholder="All Properties" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Properties</SelectItem>
+            {properties.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      {/* Technician filter */}
-      <Select
-        value={technicianId || "all"}
-        onValueChange={(v) => updateParam("technicianId", v === "all" ? "" : v)}
-      >
-        <SelectTrigger className="h-9 w-[180px] text-sm">
-          <SelectValue placeholder="All Technicians" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Technicians</SelectItem>
-          {technicians.map((t) => (
-            <SelectItem key={t.id} value={t.id}>
-              {t.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        {/* Technician filter */}
+        <Select
+          value={technicianId || "all"}
+          onValueChange={(v) => updateParam("technicianId", v === "all" ? "" : v)}
+        >
+          <SelectTrigger className="h-9 w-full md:w-[180px] text-sm">
+            <SelectValue placeholder="All Technicians" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Technicians</SelectItem>
+            {technicians.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      {/* Date range */}
-      <DatePicker
-        placeholder="From date"
-        value={from}
-        onChange={(v) => updateParam("from", v)}
-        className="w-[148px]"
-      />
-      <DatePicker
-        placeholder="To date"
-        value={to}
-        onChange={(v) => updateParam("to", v)}
-        className="w-[148px]"
-      />
+        {/* Date range */}
+        <DatePicker
+          placeholder="From date"
+          value={from}
+          onChange={(v) => updateParam("from", v)}
+          className="w-full md:w-[148px]"
+        />
+        <DatePicker
+          placeholder="To date"
+          value={to}
+          onChange={(v) => updateParam("to", v)}
+          className="w-full md:w-[148px]"
+        />
+      </div>
 
       {/* Clear all */}
       {hasFilters && (
-        <Button variant="ghost" size="sm" onClick={clearAll} className="h-9 gap-1 text-muted-foreground">
+        <Button variant="ghost" size="sm" onClick={clearAll} className="h-8 gap-1 text-muted-foreground px-2">
           <X className="h-3.5 w-3.5" />
-          Clear
+          Clear filters
         </Button>
       )}
     </div>

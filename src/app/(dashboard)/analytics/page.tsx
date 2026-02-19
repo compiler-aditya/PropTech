@@ -74,7 +74,7 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
       </Suspense>
 
       {/* Summary stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
         <StatCard
           label="Total Tickets"
           value={summary.total}
@@ -105,7 +105,7 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
           value={summary.avgResolutionDays !== null ? `${summary.avgResolutionDays}d` : "—"}
           icon={<Clock className="h-4 w-4 text-violet-500" />}
           sub="Days to close"
-          className="col-span-2 md:col-span-1"
+          className="col-span-2 sm:col-span-1 md:col-span-1"
         />
       </div>
 
@@ -159,13 +159,56 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
         </Card>
       </div>
 
-      {/* Property summary table */}
+      {/* Property summary */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium">Property Summary</CardTitle>
         </CardHeader>
-        <CardContent className="pt-0 overflow-x-auto">
-          <table className="w-full text-sm">
+        <CardContent className="pt-0">
+
+          {/* Mobile card list */}
+          <div className="md:hidden divide-y">
+            {byProperty.map((p) => {
+              const pct = p.total > 0 ? Math.round((p.completed / p.total) * 100) : 0;
+              const isSelected = p.propertyId === params.propertyId;
+              return (
+                <div
+                  key={p.propertyId}
+                  className={`py-3 ${isSelected ? "bg-primary/5 -mx-4 px-4 rounded-lg" : ""}`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="font-medium text-sm leading-tight">
+                      {isSelected && (
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary mr-1.5 align-middle" />
+                      )}
+                      {p.name}
+                    </p>
+                    <span className="text-sm font-semibold tabular-nums ml-3 shrink-0">{pct}%</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden mb-2">
+                    <div className="h-full bg-green-500 rounded-full" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="flex gap-3 text-xs text-muted-foreground">
+                    <span>
+                      <span className="tabular-nums font-semibold text-foreground">{p.total}</span> total
+                    </span>
+                    <span>
+                      <span className="tabular-nums font-semibold text-orange-500">{p.open}</span> active
+                    </span>
+                    <span>
+                      <span className="tabular-nums font-semibold text-green-500">{p.completed}</span> done
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+            {byProperty.length === 0 && (
+              <p className="py-8 text-center text-sm text-muted-foreground">No properties found</p>
+            )}
+          </div>
+
+          {/* Desktop table */}
+          <table className="hidden md:table w-full text-sm">
             <thead>
               <tr className="border-b text-muted-foreground">
                 <th className="text-left py-2 pr-4 font-medium">Property</th>
@@ -201,7 +244,7 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
                     </td>
                     <td className="text-right py-2.5 pl-3">
                       <div className="flex items-center justify-end gap-2">
-                        <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden hidden sm:block">
+                        <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
                           <div
                             className="h-full bg-green-500 rounded-full"
                             style={{ width: `${pct}%` }}
@@ -222,6 +265,7 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
               )}
             </tbody>
           </table>
+
         </CardContent>
       </Card>
     </div>
