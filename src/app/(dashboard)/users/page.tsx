@@ -53,8 +53,15 @@ export default async function UsersPage() {
                 </TableHeader>
                 <TableBody>
                   {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
+                    <TableRow key={user.id} className="hover:bg-muted/50 transition-colors">
+                      <TableCell>
+                        <div className="flex items-center gap-2.5">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold shrink-0">
+                            {user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)}
+                          </div>
+                          <span className="font-medium">{user.name}</span>
+                        </div>
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         {user.email}
                       </TableCell>

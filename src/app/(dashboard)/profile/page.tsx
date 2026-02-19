@@ -11,7 +11,7 @@ export default async function ProfilePage() {
   const avatarUrl = await getUserAvatarUrl(user.id);
 
   return (
-    <div className="p-4 md:p-6 max-w-2xl md:max-w-4xl mx-auto">
+    <div className="p-4 md:p-6 max-w-2xl md:max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Profile</h1>
       <Card>
         <CardContent className="pt-6">
@@ -29,7 +29,7 @@ export default async function ProfilePage() {
             <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
 
             {/* Details */}
-            <div className="flex-1 grid sm:grid-cols-2 gap-x-8 gap-y-5">
+            <div className="flex-1 grid sm:grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-5">
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Name</p>
                 <p className="font-medium">{user.name}</p>

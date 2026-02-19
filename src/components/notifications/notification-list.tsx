@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { markAsRead, markAllAsRead } from "@/actions/notifications";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { timeAgo } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Bell, CheckCheck, TicketPlus, UserCheck, ArrowRightLeft, MessageSquare } from "lucide-react";
@@ -36,6 +37,8 @@ export function NotificationList({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unread = notifications.filter((n) => !n.isRead);
+  const read = notifications.filter((n) => n.isRead);
 
   function handleMarkAllRead() {
     startTransition(async () => {
@@ -53,10 +56,77 @@ export function NotificationList({
     }
   }
 
+  function renderList(items: Notification[]) {
+    if (items.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <Bell className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
+          <h3 className="font-medium text-foreground">No notifications</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            You&apos;re all caught up!
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-1.5">
+        {items.map((notification) => {
+          const config = notificationConfig[notification.type] ?? defaultNotifConfig;
+          const Icon = config.icon;
+          const content = (
+            <Card
+              className={cn(
+                "cursor-pointer hover:shadow-sm transition-shadow",
+                !notification.isRead && "border-l-4 border-l-primary bg-primary/5"
+              )}
+              onClick={() => handleClick(notification)}
+            >
+              <CardContent className="p-3 md:p-3">
+                <div className="flex items-start gap-3">
+                  <div className={cn("mt-0.5 p-2 rounded-full shrink-0", config.bgClass)}>
+                    <Icon className={cn("h-4 w-4", config.iconClass)} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className={cn("text-sm", !notification.isRead && "font-semibold")}>
+                        {notification.title}
+                      </p>
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {timeAgo(notification.createdAt)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
+                      {notification.message}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+          return (
+            <div key={notification.id}>
+              {notification.linkUrl ? (
+                <Link href={notification.linkUrl}>{content}</Link>
+              ) : (
+                content
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      {unreadCount > 0 && (
-        <div className="flex justify-end">
+    <Tabs defaultValue="all" className="space-y-4">
+      <div className="flex items-center justify-between">
+        <TabsList>
+          <TabsTrigger value="all">All ({notifications.length})</TabsTrigger>
+          <TabsTrigger value="unread">Unread ({unreadCount})</TabsTrigger>
+          <TabsTrigger value="read">Read ({read.length})</TabsTrigger>
+        </TabsList>
+        {unreadCount > 0 && (
           <Button
             variant="ghost"
             size="sm"
@@ -66,64 +136,11 @@ export function NotificationList({
             <CheckCheck className="h-4 w-4 mr-1" />
             Mark all read
           </Button>
-        </div>
-      )}
-
-      {notifications.length > 0 ? (
-        <div className="space-y-2">
-          {notifications.map((notification) => {
-            const config = notificationConfig[notification.type] ?? defaultNotifConfig;
-            const Icon = config.icon;
-            const content = (
-                <Card
-                  className={cn(
-                    "cursor-pointer hover:shadow-sm transition-shadow",
-                    !notification.isRead && "border-l-4 border-l-primary bg-primary/5"
-                  )}
-                  onClick={() => handleClick(notification)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className={cn("mt-0.5 p-2 rounded-full shrink-0", config.bgClass)}>
-                        <Icon className={cn("h-4 w-4", config.iconClass)} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className={cn("text-sm", !notification.isRead && "font-semibold")}>
-                            {notification.title}
-                          </p>
-                          <span className="text-xs text-muted-foreground shrink-0">
-                            {timeAgo(notification.createdAt)}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
-                          {notification.message}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-            );
-            return (
-              <div key={notification.id}>
-                {notification.linkUrl ? (
-                  <Link href={notification.linkUrl}>{content}</Link>
-                ) : (
-                  content
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <Bell className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-          <h3 className="font-medium text-foreground">No notifications</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            You&apos;re all caught up!
-          </p>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+      <TabsContent value="all">{renderList(notifications)}</TabsContent>
+      <TabsContent value="unread">{renderList(unread)}</TabsContent>
+      <TabsContent value="read">{renderList(read)}</TabsContent>
+    </Tabs>
   );
 }

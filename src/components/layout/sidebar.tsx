@@ -30,7 +30,7 @@ const navItems: NavItem[] = [
   { href: "/profile", label: "Profile", icon: User },
 ];
 
-export function Sidebar({ userRole }: { userRole: string }) {
+export function Sidebar({ userRole, unreadCount = 0 }: { userRole: string; unreadCount?: number }) {
   const pathname = usePathname();
 
   const visibleItems = navItems.filter(
@@ -60,6 +60,11 @@ export function Sidebar({ userRole }: { userRole: string }) {
             >
               <item.icon className="h-5 w-5" />
               {item.label}
+              {item.href === "/notifications" && unreadCount > 0 && (
+                <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 min-w-5 px-1.5 flex items-center justify-center font-medium">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
             </Link>
           );
         })}

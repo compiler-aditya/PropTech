@@ -36,7 +36,7 @@ export default async function TicketDetailPage({
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+    <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <Link
         href="/tickets"
         className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"

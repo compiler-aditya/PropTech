@@ -10,7 +10,7 @@ export default async function NewTicketPage() {
   const properties = await getAllProperties();
 
   return (
-    <div className="p-4 md:p-6 max-w-2xl mx-auto">
+    <div className="p-4 md:p-6 max-w-3xl mx-auto">
       <Link
         href="/tickets"
         className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"

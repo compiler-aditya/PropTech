@@ -13,10 +13,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Bell, LogOut, User, Building2 } from "lucide-react";
+import { Bell, LogOut, User, Building2, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Fragment } from "react";
 import { ROLE_LABELS } from "@/lib/constants";
 import { ThemeToggle } from "./theme-toggle";
+
+const segmentLabels: Record<string, string> = {
+  dashboard: "Dashboard",
+  tickets: "Tickets",
+  new: "New Request",
+  properties: "Properties",
+  users: "Users",
+  analytics: "Analytics",
+  notifications: "Notifications",
+  profile: "Profile",
+};
 
 interface HeaderProps {
   userName: string;
@@ -34,6 +47,9 @@ export function Header({
   avatarUrl,
 }: HeaderProps) {
   const [isPending, startTransition] = useTransition();
+  const pathname = usePathname();
+
+  const segments = pathname.split("/").filter(Boolean);
 
   const initials = userName
     .split(" ")
@@ -48,7 +64,23 @@ export function Header({
         <Building2 className="h-6 w-6 text-primary" />
         <span className="font-bold text-lg">PropTech</span>
       </div>
-      <div className="hidden md:block" />
+      <nav className="hidden md:flex items-center gap-1 text-sm text-muted-foreground">
+        {segments.map((segment, i) => {
+          const href = "/" + segments.slice(0, i + 1).join("/");
+          const isLast = i === segments.length - 1;
+          const label = segmentLabels[segment] || (segment.length > 8 ? "Details" : segment);
+          return (
+            <Fragment key={href}>
+              {i > 0 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />}
+              {isLast ? (
+                <span className="text-foreground font-medium truncate max-w-[200px]">{label}</span>
+              ) : (
+                <Link href={href} className="hover:text-foreground transition-colors">{label}</Link>
+              )}
+            </Fragment>
+          );
+        })}
+      </nav>
 
       <div className="flex items-center gap-3">
         <Link href="/notifications" className="relative">

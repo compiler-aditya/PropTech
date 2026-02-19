@@ -21,7 +21,7 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar userRole={userRole} />
+      <Sidebar userRole={userRole} unreadCount={unreadCount} />
       <div className="md:pl-64 flex flex-col min-h-screen">
         <Header
           userName={userName}
