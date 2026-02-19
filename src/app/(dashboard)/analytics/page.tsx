@@ -9,6 +9,7 @@ import { CategoryBar } from "@/components/analytics/category-bar";
 import { MonthlyTrend } from "@/components/analytics/monthly-trend";
 import { TechnicianBar } from "@/components/analytics/technician-bar";
 import { AnalyticsFilters } from "@/components/analytics/analytics-filters";
+import { ExportButton } from "@/components/analytics/export-button";
 import {
   Ticket,
   Activity,
@@ -59,9 +60,12 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold">Analytics</h1>
-        <p className="text-sm text-muted-foreground">{scopeLabel}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold">Analytics</h1>
+          <p className="text-sm text-muted-foreground">{scopeLabel}</p>
+        </div>
+        <ExportButton data={data} scopeLabel={scopeLabel} />
       </div>
 
       {/* Filters */}
