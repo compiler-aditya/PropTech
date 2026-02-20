@@ -295,7 +295,7 @@ describe("uploads actions", () => {
 
       await removeFile("att-1");
 
-      expect(callOrder).toEqual(["deleteFile", "dbDelete"]);
+      expect(callOrder).toEqual(["dbDelete", "deleteFile"]);
     });
 
     it("calls revalidatePath with ticket path", async () => {

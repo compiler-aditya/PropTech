@@ -11,9 +11,9 @@ vi.mock("bcryptjs", () => ({
   },
 }));
 
-// Mock rate limiter — always allow
+// Mock rate limiter -- always allow
 vi.mock("@/lib/rate-limit", () => ({
-  rateLimit: vi.fn().mockReturnValue({ success: true, remaining: 10 }),
+  rateLimit: vi.fn().mockResolvedValue({ success: true, remaining: 10 }),
 }));
 
 // Mock next-auth AuthError
@@ -41,7 +41,7 @@ const mockRateLimit = vi.mocked(rateLimit);
 describe("auth actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRateLimit.mockReturnValue({ success: true, remaining: 10 });
+    mockRateLimit.mockResolvedValue({ success: true, remaining: 10 });
   });
 
   describe("loginAction", () => {
@@ -92,7 +92,7 @@ describe("auth actions", () => {
     });
 
     it("blocks login when rate limited", async () => {
-      mockRateLimit.mockReturnValue({ success: false, remaining: 0 });
+      mockRateLimit.mockResolvedValue({ success: false, remaining: 0 });
 
       const formData = createMockFormData({
         email: "test@test.com",
@@ -260,7 +260,7 @@ describe("auth actions", () => {
     });
 
     it("blocks registration when rate limited", async () => {
-      mockRateLimit.mockReturnValue({ success: false, remaining: 0 });
+      mockRateLimit.mockResolvedValue({ success: false, remaining: 0 });
 
       const result = await registerAction(validFormData());
 

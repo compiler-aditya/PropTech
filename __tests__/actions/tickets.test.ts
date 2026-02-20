@@ -3,9 +3,9 @@ import { requireAuth, requireRole } from "@/lib/auth-utils";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-// Mock rate limiter — always allow
+// Mock rate limiter -- always allow
 vi.mock("@/lib/rate-limit", () => ({
-  rateLimit: vi.fn().mockReturnValue({ success: true, remaining: 10 }),
+  rateLimit: vi.fn().mockResolvedValue({ success: true, remaining: 10 }),
 }));
 
 import {
@@ -27,6 +27,15 @@ const mockRevalidatePath = vi.mocked(revalidatePath);
 describe("tickets actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default $transaction mock: handles both callback and array styles
+    mockPrisma.$transaction.mockImplementation(async (input: unknown) => {
+      if (typeof input === "function") {
+        // Callback-style transaction: pass a mock tx that delegates to mockPrisma
+        return input(mockPrisma);
+      }
+      // Array-style transaction: resolve the promises (they are already mocked)
+      return Promise.all(input as Promise<unknown>[]);
+    });
   });
 
   describe("createTicket", () => {

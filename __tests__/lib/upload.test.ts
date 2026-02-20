@@ -1,15 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createMockFile } from "../helpers";
 
-// Mock fs modules before importing the module under test
-vi.mock("fs/promises", () => ({
-  writeFile: vi.fn().mockResolvedValue(undefined),
-  unlink: vi.fn().mockResolvedValue(undefined),
-  mkdir: vi.fn().mockResolvedValue(undefined),
-}));
-
-vi.mock("fs", () => ({
-  existsSync: vi.fn().mockReturnValue(true),
+// Mock @vercel/blob
+vi.mock("@vercel/blob", () => ({
+  put: vi.fn().mockResolvedValue({
+    url: "https://blob.vercel-storage.com/uploads/test-uuid-1234.jpg",
+  }),
+  del: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("uuid", () => ({
@@ -17,13 +14,14 @@ vi.mock("uuid", () => ({
 }));
 
 import { saveFile, deleteFile } from "@/lib/upload";
-import { writeFile, unlink, mkdir } from "fs/promises";
-import { existsSync } from "fs";
+import { put, del } from "@vercel/blob";
 
 describe("saveFile", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(existsSync).mockReturnValue(true);
+    vi.mocked(put).mockResolvedValue({
+      url: "https://blob.vercel-storage.com/uploads/test-uuid-1234.jpg",
+    } as never);
   });
 
   it("saves a valid JPEG file", async () => {
@@ -37,14 +35,24 @@ describe("saveFile", () => {
 
     expect(result).toEqual({
       filename: "photo.jpg",
-      storedName: "test-uuid-1234.jpg",
+      storedName:
+        "https://blob.vercel-storage.com/uploads/test-uuid-1234.jpg",
       mimeType: "image/jpeg",
       size: 1000,
     });
-    expect(writeFile).toHaveBeenCalledOnce();
+    expect(put).toHaveBeenCalledOnce();
+    expect(put).toHaveBeenCalledWith(
+      "uploads/test-uuid-1234.jpg",
+      expect.any(Buffer),
+      { access: "public", contentType: "image/jpeg" }
+    );
   });
 
   it("saves a valid PNG file", async () => {
+    vi.mocked(put).mockResolvedValue({
+      url: "https://blob.vercel-storage.com/uploads/test-uuid-1234.png",
+    } as never);
+
     const file = createMockFile({
       name: "image.png",
       type: "image/png",
@@ -53,7 +61,9 @@ describe("saveFile", () => {
 
     const result = await saveFile(file);
 
-    expect(result.storedName).toBe("test-uuid-1234.png");
+    expect(result.storedName).toBe(
+      "https://blob.vercel-storage.com/uploads/test-uuid-1234.png"
+    );
     expect(result.mimeType).toBe("image/png");
   });
 
@@ -98,15 +108,20 @@ describe("saveFile", () => {
     expect(result.size).toBe(5 * 1024 * 1024);
   });
 
-  it("creates upload directory if missing", async () => {
-    vi.mocked(existsSync).mockReturnValue(false);
+  it("calls put with correct blob path and options", async () => {
+    const file = createMockFile({
+      name: "test.jpg",
+      type: "image/jpeg",
+      size: 500,
+    });
 
-    const file = createMockFile();
     await saveFile(file);
 
-    expect(mkdir).toHaveBeenCalledWith(expect.stringContaining("uploads"), {
-      recursive: true,
-    });
+    expect(put).toHaveBeenCalledWith(
+      "uploads/test-uuid-1234.jpg",
+      expect.any(Buffer),
+      { access: "public", contentType: "image/jpeg" }
+    );
   });
 
   it("derives extension from MIME type, not filename", async () => {
@@ -116,9 +131,14 @@ describe("saveFile", () => {
       size: 500,
     });
 
-    const result = await saveFile(file);
-    // Extension comes from MIME type map, not filename
-    expect(result.storedName).toBe("test-uuid-1234.jpg");
+    await saveFile(file);
+
+    // The blob path should use .jpg from MIME type, not the filename
+    expect(put).toHaveBeenCalledWith(
+      "uploads/test-uuid-1234.jpg",
+      expect.any(Buffer),
+      expect.any(Object)
+    );
   });
 
   it("rejects file with spoofed MIME type (wrong magic bytes)", async () => {
@@ -132,7 +152,11 @@ describe("saveFile", () => {
   });
 
   it("accepts file with valid magic bytes", async () => {
-    // createMockFile now includes correct magic bytes
+    vi.mocked(put).mockResolvedValue({
+      url: "https://blob.vercel-storage.com/uploads/test-uuid-1234.png",
+    } as never);
+
+    // createMockFile includes correct magic bytes
     const file = createMockFile({
       name: "real.png",
       type: "image/png",
@@ -140,7 +164,26 @@ describe("saveFile", () => {
     });
 
     const result = await saveFile(file);
-    expect(result.storedName).toBe("test-uuid-1234.png");
+    expect(result.storedName).toBe(
+      "https://blob.vercel-storage.com/uploads/test-uuid-1234.png"
+    );
+  });
+
+  it("returns blob URL as storedName", async () => {
+    vi.mocked(put).mockResolvedValue({
+      url: "https://blob.vercel-storage.com/uploads/test-uuid-1234.jpg",
+    } as never);
+
+    const file = createMockFile({
+      name: "photo.jpg",
+      type: "image/jpeg",
+      size: 1000,
+    });
+
+    const result = await saveFile(file);
+    expect(result.storedName).toBe(
+      "https://blob.vercel-storage.com/uploads/test-uuid-1234.jpg"
+    );
   });
 });
 
@@ -149,24 +192,27 @@ describe("deleteFile", () => {
     vi.clearAllMocks();
   });
 
-  it("deletes existing file", async () => {
-    await deleteFile("abc.jpg");
+  it("calls del with the stored name", async () => {
+    await deleteFile("https://blob.vercel-storage.com/uploads/abc.jpg");
 
-    expect(unlink).toHaveBeenCalledWith(
-      expect.stringContaining("uploads/abc.jpg")
+    expect(del).toHaveBeenCalledWith(
+      "https://blob.vercel-storage.com/uploads/abc.jpg"
     );
   });
 
   it("silently handles missing file", async () => {
-    vi.mocked(unlink).mockRejectedValueOnce(new Error("ENOENT"));
+    vi.mocked(del).mockRejectedValueOnce(new Error("Not found"));
 
-    await expect(deleteFile("missing.jpg")).resolves.not.toThrow();
+    await expect(
+      deleteFile("https://blob.vercel-storage.com/missing.jpg")
+    ).resolves.not.toThrow();
   });
 
-  it("constructs correct file path", async () => {
-    await deleteFile("test-file.png");
+  it("passes storedName directly to del", async () => {
+    const storedName =
+      "https://blob.vercel-storage.com/uploads/test-file.png";
+    await deleteFile(storedName);
 
-    const callArg = vi.mocked(unlink).mock.calls[0][0] as string;
-    expect(callArg).toMatch(/public[/\\]uploads[/\\]test-file\.png$/);
+    expect(del).toHaveBeenCalledWith(storedName);
   });
 });

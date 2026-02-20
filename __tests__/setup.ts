@@ -4,7 +4,27 @@ import { vi } from "vitest";
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
   revalidateTag: vi.fn(),
+  unstable_cache: vi.fn(
+    // unstable_cache(fn, keys, opts) returns a function that, when called,
+    // just invokes the original fn (no caching in tests).
+    (fn: (...args: unknown[]) => unknown) => fn
+  ),
 }));
+
+// ---- Mock next/headers ----
+const mockHeadersMap = new Map<string, string>();
+
+vi.mock("next/headers", () => ({
+  headers: vi.fn(async () => ({
+    get: (name: string) => mockHeadersMap.get(name) ?? null,
+    has: (name: string) => mockHeadersMap.has(name),
+    entries: () => mockHeadersMap.entries(),
+    forEach: (cb: (value: string, key: string) => void) =>
+      mockHeadersMap.forEach(cb),
+  })),
+}));
+
+export { mockHeadersMap };
 
 // ---- Mock next/navigation ----
 export class RedirectError extends Error {
@@ -30,9 +50,11 @@ export const mockPrisma = {
     findUnique: vi.fn(),
     findMany: vi.fn(),
     create: vi.fn(),
+    update: vi.fn(),
   },
   property: {
     findMany: vi.fn(),
+    findUnique: vi.fn(),
     create: vi.fn(),
   },
   maintenanceTicket: {
@@ -60,6 +82,7 @@ export const mockPrisma = {
     count: vi.fn(),
     updateMany: vi.fn(),
   },
+  $transaction: vi.fn(),
 };
 
 vi.mock("@/lib/prisma", () => ({
@@ -80,7 +103,7 @@ vi.mock("@/lib/auth", () => ({
 }));
 
 // ---- Mock @/lib/auth-utils ----
-// canAccessTicket is a pure function — use the real implementation
+// canAccessTicket is a pure function -- use the real implementation
 vi.mock("@/lib/auth-utils", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/auth-utils")>();
   return {

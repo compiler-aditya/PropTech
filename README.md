@@ -152,6 +152,36 @@ src/
 - **Zod validation** at server action boundaries for runtime type safety
 - **Recharts via shadcn chart wrapper** for consistent chart styling with theme support
 
+## Testing
+
+246 tests across 15 test files using **Vitest**.
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npx vitest run --coverage
+```
+
+| Test File | Tests | What's Covered |
+|-----------|-------|---------------|
+| `actions/tickets.test.ts` | 49 | CRUD, status transitions, priority, assignment, dashboard stats |
+| `actions/auth.test.ts` | 16 | Login, register, logout, rate limiting, validation |
+| `actions/uploads.test.ts` | 18 | File upload, removal, access control, COMPLETED ticket guard |
+| `actions/analytics.test.ts` | 14 | Summary stats, filters, property/technician scoping, trends |
+| `actions/profile.test.ts` | 13 | Avatar upload, removal, old avatar cleanup, cache revalidation |
+| `actions/comments.test.ts` | 12 | Add comment, validation, notifications, activity log |
+| `actions/notifications.test.ts` | 10 | Create, list, mark read, email side-effects |
+| `actions/properties.test.ts` | 10 | CRUD, validation, manager scoping |
+| `lib/utils.test.ts` | 32 | cn, formatDate, formatDateTime, timeAgo, formatFileSize |
+| `lib/validations/auth.test.ts` | 20 | Login and register Zod schemas |
+| `lib/constants.test.ts` | 15 | Status transitions, label maps, upload constants |
+| `lib/validations/ticket.test.ts` | 14 | Ticket creation schema, boundaries |
+| `lib/upload.test.ts` | 12 | Vercel Blob save/delete, MIME validation, magic bytes |
+| `lib/email.test.ts` | 5 | SMTP send, HTML templates, env var fallback |
+| `actions/users.test.ts` | 3 | Technician listing, role guard |
+
 ## Available Scripts
 
 | Command | Description |
@@ -159,6 +189,7 @@ src/
 | `npm run dev` | Start development server |
 | `npm run build` | Build for production |
 | `npm run start` | Start production server |
+| `npm test` | Run test suite |
 | `npx tsx prisma/seed.ts` | Seed demo data |
 | `npx prisma migrate dev` | Run migrations |
 | `npx prisma studio` | Open Prisma Studio |
