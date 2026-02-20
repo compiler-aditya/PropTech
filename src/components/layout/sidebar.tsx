@@ -12,6 +12,7 @@ import {
   Users,
   BarChart3,
 } from "lucide-react";
+import { useUnreadCount } from "@/components/notifications/notification-provider";
 
 interface NavItem {
   href: string;
@@ -30,8 +31,9 @@ const navItems: NavItem[] = [
   { href: "/profile", label: "Profile", icon: User },
 ];
 
-export function Sidebar({ userRole, unreadCount = 0 }: { userRole: string; unreadCount?: number }) {
+export function Sidebar({ userRole }: { userRole: string }) {
   const pathname = usePathname();
+  const { unreadCount } = useUnreadCount();
 
   const visibleItems = navItems.filter(
     (item) => !item.roles || item.roles.includes(userRole)

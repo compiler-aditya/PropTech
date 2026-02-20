@@ -10,6 +10,7 @@ import { timeAgo } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Bell, CheckCheck, TicketPlus, UserCheck, ArrowRightLeft, MessageSquare } from "lucide-react";
 import Link from "next/link";
+import { useUnreadCount } from "@/components/notifications/notification-provider";
 
 interface Notification {
   id: string;
@@ -36,6 +37,7 @@ export function NotificationList({
 }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const { refresh: refreshUnreadCount } = useUnreadCount();
   const unreadCount = notifications.filter((n) => !n.isRead).length;
   const unread = notifications.filter((n) => !n.isRead);
   const read = notifications.filter((n) => n.isRead);
@@ -43,6 +45,7 @@ export function NotificationList({
   function handleMarkAllRead() {
     startTransition(async () => {
       await markAllAsRead();
+      refreshUnreadCount();
       router.refresh();
     });
   }
@@ -51,6 +54,7 @@ export function NotificationList({
     if (!notification.isRead) {
       startTransition(async () => {
         await markAsRead(notification.id);
+        refreshUnreadCount();
         router.refresh();
       });
     }

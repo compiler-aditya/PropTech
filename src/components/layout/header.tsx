@@ -19,6 +19,7 @@ import { usePathname } from "next/navigation";
 import { Fragment } from "react";
 import { ROLE_LABELS } from "@/lib/constants";
 import { ThemeToggle } from "./theme-toggle";
+import { useUnreadCount } from "@/components/notifications/notification-provider";
 
 const segmentLabels: Record<string, string> = {
   dashboard: "Dashboard",
@@ -35,7 +36,6 @@ interface HeaderProps {
   userName: string;
   userRole: string;
   userEmail: string;
-  unreadCount?: number;
   avatarUrl?: string | null;
 }
 
@@ -43,9 +43,9 @@ export function Header({
   userName,
   userRole,
   userEmail,
-  unreadCount = 0,
   avatarUrl,
 }: HeaderProps) {
+  const { unreadCount } = useUnreadCount();
   const [isPending, startTransition] = useTransition();
   const pathname = usePathname();
 
