@@ -32,7 +32,7 @@ export default auth((req) => {
     if (isAuthenticated) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.next();
   }
 
   // Protected routes require auth
